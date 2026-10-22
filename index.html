@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameVault — Play Something</title>
+<style>
+:root{--bg:#0b0b13;--panel:#151522;--line:#29293d;--text:#f5f3ff;--muted:#aaa7c0;--purple:#a18aff;--cyan:#62e9df;--pink:#ff79ba}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 80% 0%,#29204b,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1100px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;background:#0b0b13ed;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:5}
+nav{min-height:68px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.brand{font-size:21px;font-weight:900;letter-spacing:-1px}
+.brand span{color:var(--cyan)}
+nav a{color:var(--muted);text-decoration:none}
+.search{margin-left:auto;max-width:280px;width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:white}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;padding:65px 0 45px}
+.eyebrow{color:var(--cyan);font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(42px,7vw,72px);line-height:1.02;letter-spacing:-3px;margin:15px 0}
+.gradient{background:linear-gradient(90deg,var(--purple),var(--cyan),var(--pink));color:transparent;background-clip:text}
+p{color:var(--muted)}
+.hero p{font-size:17px;max-width:480px}
+.art{height:260px;border:1px solid var(--line);border-radius:25px;display:grid;place-items:center;background:linear-gradient(145deg,#211b3d,#111c26);overflow:hidden;position:relative}
+.orb{width:145px;height:145px;border-radius:50%;background:radial-gradient(circle at 30% 25%,white,#9d8aff 12%,#4c3d9c 50%,#151326 75%);box-shadow:0 0 70px #a18aff77}
+.ring{position:absolute;width:260px;height:90px;border:2px solid #62e9df99;border-radius:50%;transform:rotate(-30deg)}
+.tag{position:absolute;padding:8px 12px;border:1px solid #ffffff22;border-radius:10px;background:#11111ee8;font-size:12px;font-weight:800}
+.tag.one{top:20px;left:15px}.tag.two{right:15px;bottom:20px}
+.btn,.chip{border:1px solid var(--line);border-radius:11px;padding:10px 15px;background:var(--panel);color:var(--text);font-weight:750}
+.btn.primary{background:linear-gradient(100deg,var(--purple),var(--cyan));color:#10101a;border:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.heading{margin:15px 0 18px}
+.heading h2{margin-bottom:3px;font-size:26px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.chip{border-radius:99px;color:var(--muted);font-size:13px}
+.chip.active{background:#a18aff25;color:#d8cdff;border-color:var(--purple)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{border:1px solid var(--line);border-radius:17px;overflow:hidden;background:var(--panel);min-width:0}
+.cover{height:145px;display:grid;place-items:center;position:relative;background:linear-gradient(140deg,var(--glow),#171725 75%)}
+.emoji{font-size:55px;filter:drop-shadow(0 8px 12px #0008)}
+.status{position:absolute;top:10px;left:10px;padding:4px 7px;border-radius:6px;background:#090911bb;font-size:10px;font-weight:800}
+.fav{position:absolute;top:8px;right:8px;background:#11111dcc;border:1px solid #ffffff22;border-radius:9px;color:var(--pink);font-size:20px;width:34px;height:34px}
+.details{padding:14px}
+.details h3{font-size:16px;margin:0}
+.details p{font-size:13px;min-height:39px;margin:7px 0 13px}
+.play{width:100%;border:1px solid #a18aff55;border-radius:10px;padding:9px;background:#a18aff15;color:#d8cdff;font-weight:800}
+.play:hover{background:#a18aff30}
+#player{display:none;margin-top:30px;padding:22px;border:1px solid #a18aff66;background:var(--panel);border-radius:18px;text-align:center}
+#player.open{display:block}
+#stage{min-height:175px;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;background:#0b0b13;margin:20px 0;padding:15px}
+.target{height:105px;width:105px;border:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,white,#62e9df,#19775f);color:#071a16;font-weight:900;font-size:23px;box-shadow:0 0 35px #62e9df66}
+footer{margin-top:60px;padding:25px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.empty{grid-column:1/-1;padding:35px;text-align:center;color:var(--muted)}
+@media(max-width:720px){.hero{grid-template-columns:1fr;padding-top:32px}.art{height:190px;grid-row:1}.orb{width:110px;height:110px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}nav{gap:12px;padding:12px 0}.search{max-width:none;flex:1}.hero h1{letter-spacing:-2px}}
+@media(max-width:420px){.grid{gap:9px}.cover{height:110px}.details{padding:10px}.details p{font-size:12px}}
+</style>
+</head>
+<body>
+<header><nav class="wrap">
+<div class="brand">⌁ Game<span>Vault</span></div>
+<a href="#games">Explore</a>
+<a href="#games" id="favLink">Favorites ♡</a>
+<input class="search" id="search" placeholder="⌕ Search games..." aria-label="Search games">
+</nav></header>
+
+<main class="wrap">
+<section class="hero">
+<div>
+<div class="eyebrow">✦ Your next quick-play fix</div>
+<h1>Less scrolling.<br><span class="gradient">More playing.</span></h1>
+<p>A neon-lit arcade for quick breaks. Find your next favorite and jump into the action.</p>
+<div class="actions">
+<a href="#games"><button class="btn primary">Explore games ↗</button></a>
+<button class="btn" id="surprise">Surprise me ✦</button>
+</div>
+<p id="stats">6 games · 0 favorites</p>
+</div>
+<div class="art" aria-hidden="true"><div class="ring"></div><div class="orb"></div><div class="tag one">✦ ARCADE MODE</div><div class="tag two">READY WHEN YOU ARE</div></div>
+</section>
+
+<section id="games">
+<div class="heading"><h2>Pick your next game</h2><p>Small games. Instant starts. Your call.</p></div>
+<div class="filters" id="filters">
+<button class="chip active" data-filter="All">All games</button>
+<button class="chip" data-filter="Arcade">Arcade</button>
+<button class="chip" data-filter="Puzzle">Puzzle</button>
+<button class="chip" data-filter="Casual">Casual</button>
+<button class="chip" data-filter="Favorites">♡ Favorites</button>
+</div>
+<div class="grid" id="grid"></div>
+</section>
+
+<section id="player">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+<h2 id="playerTitle">Neon Reflex</h2>
+<button class="btn" id="close">✕ Close</button>
+</div>
+<p>Wait for green, then click the target as quickly as you can!</p>
+<div id="stage"><button class="btn primary" id="start">Start challenge</button></div>
+<p id="result" aria-live="polite">Best score: —</p>
+</section>
+
+<section class="heading" style="margin-top:45px" id="about">
+<h2>A cozy corner of the internet</h2>
+<p>Inspired by browser-game libraries, built as its own original project.</p>
+</section>
+</main>
+<footer class="wrap">⌁ GameVault · Made for play, built with curiosity.</footer>
+
+<script>
+const games=[
+{id:"reflex",name:"Neon Reflex",cat:"Arcade",emoji:"🎯",glow:"#164d55",desc:"Test your reaction speed in a glowing target challenge.",play:true},
+{id:"orbit",name:"Orbit Dodge",cat:"Arcade",emoji:"🪐",glow:"#35265e",desc:"A space-survival game concept.",play:false},
+{id:"pairs",name:"Pixel Pairs",cat:"Puzzle",emoji:"🧩",glow:"#592b4c",desc:"Match pairs and train your memory.",play:false},
+{id:"clicker",name:"Cozy Clicker",cat:"Casual",emoji:"🍀",glow:"#24472f",desc:"A relaxing clicker game concept.",play:false},
+{id:"numbers",name:"Number Ninja",cat:"Puzzle",emoji:"🔢",glow:"#594027",desc:"Quick number challenges for sharp minds.",play:false},
+{id:"racer",name:"Tiny Racer",cat:"Arcade",emoji:"🏎️",glow:"#65352d",desc:"A bite-sized racing game concept.",play:false}
+];
+let filter="All",query="",favorites=new Set(JSON.parse(localStorage.getItem("gv-favorites")||"[]"));
+const grid=document.getElementById("grid");
+function render(){
+const list=games.filter(g=>(filter==="All"||(filter==="Favorites"?favorites.has(g.id):g.cat===filter))&&(g.name+" "+g.cat+" "+g.desc).toLowerCase().includes(query.toLowerCase()));
+grid.innerHTML=list.length?list.map(g=>`<article class="card"><div class="cover" style="--glow:${g.glow}"><span class="status">${g.play?"PLAYABLE":"COMING SOON"}</span><span class="emoji">${g.emoji}</span><button class="fav" data-fav="${g.id}" aria-label="Toggle favorite">${favorites.has(g.id)?"♥":"♡"}</button></div><div class="details"><h3>${g.name}</h3><p>${g.desc}</p><button class="play" data-play="${g.id}">${g.play?"▶ Play now":"＋ Coming soon"}</button></div></article>`).join(""):'<div class="empty">No games found. Try another search or category.</div>';
+document.getElementById("stats").textContent=`6 games · ${favorites.size} favorites`;
+document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===filter));
+}
+grid.addEventListener("click",e=>{
+const f=e.target.closest("[data-fav]");
+if(f){favorites.has(f.dataset.fav)?favorites.delete(f.dataset.fav):favorites.add(f.dataset.fav);localStorage.setItem("gv-favorites",JSON.stringify([...favorites]));render();return}
+const p=e.target.closest("[data-play]");
+if(p){if(p.dataset.play==="reflex")openGame();else alert("This game is planned for a future update!")}
+});
+document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(b){filter=b.dataset.filter;render()}});
+document.getElementById("favLink").addEventListener("click",()=>{filter="Favorites";render()});
+document.getElementById("search").addEventListener("input",e=>{query=e.target.value;render()});
+document.getElementById("surprise").addEventListener("click",openGame);
+document.getElementById("close").addEventListener("click",()=>document.getElementById("player").classList.remove("open"));
+
+function openGame(){
+const player=document.getElementById("player"),stage=document.getElementById("stage");
+player.classList.add("open");player.scrollIntoView({behavior:"smooth"});
+let best=localStorage.getItem("gv-best");
+document.getElementById("result").textContent="Best score: "+(best?best+" ms":"—");
+stage.innerHTML='<button class="btn primary" id="start">Start challenge</button>';
+document.getElementById("start").onclick=begin;
+function begin(){
+let mode="waiting",timer;
+stage.innerHTML='<button class="target" id="target">WAIT</button>';
+const target=document.getElementById("target");
+target.style.background="radial-gradient(circle,#ffbd66,#a94b44)";
+timer=setTimeout(()=>{
+mode="ready";let start=Date.now();
+target.textContent="GO!";
+target.style.background="radial-gradient(circle,#fff,#62ff9b,#168454)";
+target.onclick=()=>{
+if(mode!=="ready")return;
+mode="done";let ms=Date.now()-start;
+if(!best||ms<Number(best)){best=String(ms);localStorage.setItem("gv-best",best)}
+document.getElementById("result").textContent=`Your time: ${ms} ms · Best score: ${best} ms`;
+stage.innerHTML=`<div><h2>${ms<250?"Lightning fast!":ms<400?"Nice reflexes!":"Good run! Try to beat your time."}</h2><button class="btn primary" id="again">Play again</button></div>`;
+document.getElementById("again").onclick=begin;
+};
+},900+Math.random()*2200);
+target.onclick=()=>{
+if(mode!=="waiting")return;
+clearTimeout(timer);mode="done";
+stage.innerHTML='<div><h2 style="color:#ffbd66">Too soon!</h2><button class="btn" id="again">Try again</button></div>';
+document.getElementById("again").onclick=begin;
+};
+}
+}
+render();
+</script>
+</body>
+</html>
