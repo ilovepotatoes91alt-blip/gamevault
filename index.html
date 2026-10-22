@@ -1,212 +1,814 @@
-
-<!DOCTYPE html>
+import json, html, os, textwrap, re
+games = [
+("2048","Puzzle","Number tile puzzle","https://play2048.co/","🧩"),
+("Hextris","Puzzle","Fast hexagon block puzzle","https://hextris.io/","🔷"),
+("A Dark Room","Adventure","Minimalist text-based adventure","https://adarkroom.doublespeakgames.com/","🌒"),
+("Freeciv Web","Strategy","Civilization-style turn-based strategy","https://www.freecivweb.com/","🏛️"),
+("HexGL","Racing","Futuristic 3D racing","https://hexgl.bkcore.com/","🏎️"),
+("Trigger Rally","Racing","Arcade rally racing","https://triggerrally.com/","🏁"),
+("Particle Clicker","Clicker","Incremental science clicker","https://particle-clicker.web.cern.ch/","⚛️"),
+("Cookie Clicker","Clicker","Classic incremental cookie game","https://orteil.dashnet.org/cookieclicker/","🍪"),
+("Universal Paperclips","Clicker","Incremental strategy clicker","https://www.decisionproblem.com/paperclips/","📎"),
+("Idle Breakout","Clicker","Idle brick-breaking game","https://www.coolmathgames.com/0-idle-breakout","🧱"),
+("Little Alchemy 2","Puzzle","Combine elements to discover items","https://littlealchemy2.com/","🧪"),
+("The Wiki Game","Puzzle","Navigate Wikipedia between targets","https://www.thewikigame.com/","📚"),
+("Chess.com","Board","Online chess and puzzles","https://www.chess.com/play","♟️"),
+("Lichess","Board","Free chess, puzzles, and analysis","https://lichess.org/","♟️"),
+("Skribbl.io","Party","Draw and guess with friends","https://skribbl.io/","🎨"),
+("Gartic Phone","Party","Telephone game with drawings","https://garticphone.com/","☎️"),
+("GeoGuessr","Geography","Guess locations from street imagery","https://www.geoguessr.com/","🌍"),
+("Worldle","Geography","Guess a country by its shape","https://worldle.teuteuf.fr/","🗺️"),
+("Globle","Geography","Find the mystery country","https://globle-game.com/","🌐"),
+("Wordle","Word","Daily five-letter word puzzle","https://www.nytimes.com/games/wordle/index.html","🔤"),
+("Connections","Word","Group words into hidden categories","https://www.nytimes.com/games/connections","🔗"),
+("Sudoku.com","Puzzle","Classic number-placement puzzle","https://sudoku.com/","🔢"),
+("Jigsaw Explorer","Puzzle","Online jigsaw puzzles","https://www.jigsawexplorer.com/","🧩"),
+("Minesweeper Online","Puzzle","Classic logic minefield puzzle","https://minesweeper.online/","💣"),
+("Simon Tatham's Puzzles","Puzzle","Collection of logic puzzles","https://www.chiark.greenend.org.uk/~sgtatham/puzzles/","🧠"),
+("Nonogram.com","Puzzle","Picture logic puzzles","https://nonogram.com/","🖼️"),
+("Flow Free","Puzzle","Connect matching colors without crossing","https://www.coolmathgames.com/0-flow-free","🌈"),
+("Cut the Rope","Puzzle","Physics-based rope puzzle","https://www.crazygames.com/game/cut-the-rope","🍬"),
+("Fireboy and Watergirl","Platformer","Co-op elemental platform puzzle","https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple","🔥"),
+("World's Hardest Game","Arcade","Precision maze challenge","https://www.coolmathgames.com/0-worlds-hardest-game","🟥"),
+("Run 3","Platformer","Run through space tunnels","https://www.coolmathgames.com/0-run-3","🏃"),
+("Slope","Arcade","Guide a ball down a fast 3D course","https://www.coolmathgames.com/0-slope","🟢"),
+("Drift Hunters","Racing","Drifting and car tuning","https://www.drifthunters.com/","🚗"),
+("Moto X3M","Racing","Motorbike obstacle racing","https://www.coolmathgames.com/0-moto-x3m","🏍️"),
+("Madalin Stunt Cars 2","Racing","Open driving and stunt tracks","https://www.madalingames.com/madalin-stunt-cars-2/","🚘"),
+("Polytrack","Racing","Low-poly time-trial racing","https://polytrack.org/","🏁"),
+("Dino Game","Arcade","Endless runner with a dinosaur","https://chromedino.com/","🦖"),
+("Chrome Music Lab: Rhythm","Rhythm","Make patterns and experiment with rhythm","https://musiclab.chromeexperiments.com/Rhythm/","🥁"),
+("Chrome Music Lab: Song Maker","Music","Create music with a grid","https://musiclab.chromeexperiments.com/Song-Maker/","🎵"),
+("Quick, Draw!","Party","Draw something for an AI to guess","https://quickdraw.withgoogle.com/","✏️"),
+("Blob Opera","Music","Make an opera with animated blobs","https://artsandculture.google.com/experiment/blob-opera/AAHWrq360NcGbw","🎤"),
+("Neal.fun Infinite Craft","Crafting","Combine discoveries in a crafting sandbox","https://neal.fun/infinite-craft/","🌱"),
+("Neal.fun The Password Game","Puzzle","Solve an unusual rule-based puzzle","https://neal.fun/password-game/","🔐"),
+("Neal.fun Stimulation Clicker","Clicker","Satirical incremental clicker","https://neal.fun/stimulation-clicker/","🖱️"),
+("Neal.fun The Deep Sea","Exploration","Explore a scrolling ocean depth chart","https://neal.fun/deep-sea/","🐋"),
+("Neal.fun Spend Bill Gates' Money","Simulation","Explore a money-spending sandbox","https://neal.fun/spend/","💸"),
+("Neal.fun Draw Logos From Memory","Drawing","Draw familiar logos from memory","https://neal.fun/draw-logos-from-memory/","🖍️"),
+("Agar.io","Multiplayer","Grow by collecting smaller cells","https://agar.io/","🟣"),
+("Slither.io","Multiplayer","Grow a snake and avoid collisions","https://slither.io/","🐍"),
+("TETR.IO","Puzzle","Modern falling-block puzzle game","https://tetr.io/","🟪"),
+("Jstris","Puzzle","Fast browser block-stacking game","https://jstris.jezeve.com/","🟦"),
+("Tic-Tac-Toe","Board","Classic three-in-a-row game","https://playtictactoe.org/","⭕"),
+("Checkers","Board","Play classic checkers online","https://cardgames.io/checkers/","🔴"),
+("Backgammon","Board","Classic board strategy game","https://cardgames.io/backgammon/","🎲"),
+("Mahjong Solitaire","Puzzle","Match free tile pairs","https://www.247mahjong.com/","🀄"),
+("Solitaire","Card","Classic Klondike card game","https://solitaired.com/","🃏"),
+("FreeCell","Card","Plan card moves to clear the board","https://cardgames.io/freecell/","♣️"),
+("Spider Solitaire","Card","Arrange cards in descending sequences","https://cardgames.io/spidersolitaire/","🕷️"),
+("Hearts","Card","Trick-taking card game","https://cardgames.io/hearts/","♥️"),
+("Yahtzee","Dice","Roll dice to score combinations","https://cardgames.io/yahtzee/","🎲"),
+("Mini Metro","Strategy","Plan efficient transit lines","https://dinopoloclub.com/minimetro/","🚇"),
+("Townscaper","Sandbox","Build colorful little towns","https://oskarstalberg.com/Townscaper/","🏘️"),
+("3D City Builder","Simulation","Build a city in the browser","https://3d.city/","🏙️"),
+("OpenStreetMap","Exploration","Explore a real-world map","https://www.openstreetmap.org/","🧭"),
+("Fallen London","Adventure","Narrative browser role-playing game","https://www.fallenlondon.com/","🕯️"),
+("Kingdom of Loathing","RPG","Comedic text-based role-playing game","https://www.kingdomofloathing.com/","👑"),
+("Neopets","Virtual World","Virtual pets and mini-games","https://www.neopets.com/","🐾"),
+("Poptropica","Adventure","Explore islands and solve quests","https://www.poptropica.com/","🏝️"),
+("Coolmath Games","Game Portal","Browse a large collection of browser games","https://www.coolmathgames.com/","🎮"),
+("Poki","Game Portal","Browse a large browser-game library","https://poki.com/","🎮"),
+("itch.io Browser Games","Game Portal","Browse indie games tagged for browsers","https://itch.io/games/html5","🕹️"),
+("Game Jolt","Game Portal","Browse indie games and projects","https://gamejolt.com/","🎮"),
+("Newgrounds Games","Game Portal","Browse web games from indie creators","https://www.newgrounds.com/games","🕹️"),
+("Open Games","Open Source","Open-source browser game directory","https://www.open-games.org/","🌐"),
+("Open Awesome Browser Games","Open Source","Directory of open-source browser-game projects","https://open-awesome.com/tags/browser-game","📂"),
+("ArcadeBloom","Indie Games","Curated indie browser-game directory","https://arcadebloom.com/","🌸"),
+("Minix Games","Game Portal","Browse browser puzzles and arcade games","https://minix.games/browser-games","🎮"),
+("Free Online Games","Game Portal","Browse browser games by category","https://www.crazygames.com/","🎮"),
+("The Useless Web","Surprise","Discover random unusual websites","https://theuselessweb.com/","🎲"),
+("Pointer Pointer","Surprise","A playful pointer-finding experiment","https://pointerpointer.com/","👉"),
+("Patatap","Music","Make sounds and animations with keys","https://patatap.com/","🎹"),
+("Falling Sand Game","Sandbox","Experiment with particles and materials","https://sandspiel.club/","🏖️"),
+("Neal.fun Asteroid Launcher","Simulation","Explore an asteroid-impact simulator","https://neal.fun/asteroid-launcher/","☄️"),
+("Neal.fun Who Was Alive","History","Compare historical lifespans","https://neal.fun/who-was-alive/","📅"),
+("Neal.fun Size of Space","Exploration","Explore scale across the universe","https://neal.fun/size-of-space/","🌌"),
+("Neal.fun Wonders of Street View","Exploration","Explore unusual places around the world","https://neal.fun/wonders-of-street-view/","🗺️"),
+("Neal.fun Absurd Trolley Problems","Puzzle","Choose between silly moral dilemmas","https://neal.fun/absurd-trolley-problems/","🚋"),
+("Neal.fun Internet Artifacts","Exploration","Browse curious objects from the internet","https://neal.fun/internet-artifacts/","💾"),
+("Neal.fun Printing Money","Simulation","Explore a money-printing thought experiment","https://neal.fun/printing-money/","🖨️"),
+("Neal.fun Spend Elon Musk's Money","Simulation","Explore a money-spending sandbox","https://neal.fun/spend/","🛍️"),
+("Neal.fun Deep Sea","Exploration","Scroll through ocean depths","https://neal.fun/deep-sea/","🐙"),
+("World Geography Games","Geography","Practice geography with interactive quizzes","https://world-geography-games.com/","🌎"),
+("Seterra","Geography","Map quizzes for countries and capitals","https://www.geoguessr.com/seterra","🗺️"),
+("Sporcle","Trivia","Large collection of timed quizzes","https://www.sporcle.com/","❓"),
+("JetPunk","Trivia","Geography and general knowledge quizzes","https://www.jetpunk.com/","🧠"),
+("Daily Crossword","Word","Online crossword puzzles","https://www.boatloadpuzzles.com/playcrossword","✍️"),
+("Word Search","Word","Find hidden words in a grid","https://thewordsearch.com/","🔎"),
+("Boggle","Word","Find words in a letter grid","https://wordshake.com/","🔤"),
+("TypingClub","Skill","Practice typing through interactive lessons","https://www.typingclub.com/","⌨️"),
+("Monkeytype","Skill","Minimalist typing speed challenge","https://monkeytype.com/","⌨️"),
+("Human Benchmark","Skill","Reaction, memory, and typing tests","https://humanbenchmark.com/","🧠"),
+("Aim Trainer","Skill","Practice mouse accuracy with targets","https://aimtrainer.io/","🎯"),
+("ChessKid","Board","Chess lessons and puzzles","https://www.chesskid.com/","♟️"),
+("Daily Chess Puzzle","Board","Solve a chess tactic","https://lichess.org/training","♟️"),
+("Sudoku Online","Puzzle","Play Sudoku in the browser","https://sudoku.com/","🔢"),
+("Kakuro","Puzzle","Cross-sum logic puzzle","https://www.kakuro-online.com/","➕"),
+("KenKen","Puzzle","Arithmetic and logic grid puzzles","https://www.kenkenpuzzle.com/","➗"),
+("Picross","Puzzle","Solve picture logic grids","https://www.nonograms.org/","🖼️"),
+("Simon Says","Memory","Repeat an increasingly long sequence","https://www.memozor.com/memory-games/for-adults/simon","🟢"),
+("Memory Game","Memory","Match pairs of cards","https://www.memozor.com/memory-games","🧠"),
+("Jigsaw Planet","Puzzle","Play community-made jigsaw puzzles","https://www.jigsawplanet.com/","🧩"),
+("Daily Solitaire","Card","Play solitaire online","https://www.solitaire.com/","🃏"),
+("Daily Mahjong","Puzzle","Play tile-matching mahjong solitaire","https://www.mahjongsolitaire.com/","🀄"),
+("Pong","Arcade","Classic paddle-and-ball game","https://www.ponggame.org/","🏓"),
+("Pac-Man","Arcade","Classic maze-chase game","https://www.google.com/search?q=Pac-Man+Doodle+Google","🟡"),
+("Google Minesweeper","Puzzle","Play Minesweeper in a browser","https://www.google.com/search?q=Google+Minesweeper","💣"),
+("Google Solitaire","Card","Play a browser solitaire game","https://www.google.com/search?q=Google+Solitaire","🃏"),
+("Google Snake","Arcade","Play the classic snake game","https://www.google.com/search?q=Google+Snake+game","🐍"),
+("Quick Draw","Party","Draw prompts for a machine-learning game","https://quickdraw.withgoogle.com/","✏️"),
+("Chrome Dino","Arcade","Run and jump with the Chrome dinosaur","https://chromedino.com/","🦖"),
+("Worldle Countries","Geography","Guess a country from its silhouette","https://worldle.teuteuf.fr/","🌍"),
+("Flagle","Geography","Guess a flag from clues","https://www.flagle.io/","🏳️"),
+("Travle","Geography","Connect countries by land borders","https://travle.earth/","🧭"),
+("Globle Capitals","Geography","Guess a capital city","https://globle-capital.com/","🏙️"),
+("Guess the Game","Trivia","Identify games from screenshots","https://guessthe.game/","🎮"),
+("Framed","Film Puzzle","Guess a film from still frames","https://framed.wtf/","🎬"),
+("Heardle","Music Puzzle","Guess a song from a short clip","https://heardlewordle.io/","🎧"),
+("Nerdle","Math Puzzle","Guess a hidden equation","https://nerdlegame.com/","➗"),
+("Waffle","Word","Swap letters to solve a word grid","https://wafflegame.net/","🧇"),
+("Quordle","Word","Solve four word puzzles at once","https://www.merriam-webster.com/games/quordle/","🔠"),
+("Octordle","Word","Solve eight word puzzles at once","https://octordle.com/","🔡"),
+("Connections Unlimited","Word","Group words into categories","https://connectionsgame.org/","🔗"),
+("Daily Puzzles","Puzzle","Browse daily logic and word challenges","https://www.puzzle-bridges.com/","🧩"),
+("Turtle Diary Games","Education","Educational games and quizzes","https://www.turtlediary.com/games.html","🐢"),
+("PBS Kids Games","Education","Learning games for kids","https://pbskids.org/games/","📘"),
+("NASA Space Place Games","Education","Space and science games","https://spaceplace.nasa.gov/menu/play/","🚀"),
+("PhET Simulations","Simulation","Interactive science simulations","https://phet.colorado.edu/en/simulations/filter?type=html","🧪"),
+("Desmos Marbleslides","Puzzle","Explore math with interactive challenges","https://www.desmos.com/","🔵"),
+("GeoFS","Simulation","Fly in a browser-based flight simulator","https://www.geo-fs.com/","✈️"),
+("FlightGear Web Demo","Simulation","Explore browser-based flight simulation demos","https://www.flightgear.org/","🛫"),
+("OpenTTD","Strategy","Transport tycoon simulation project","https://www.openttd.org/","🚂"),
+("Freeciv","Strategy","Open-source civilization strategy game","https://www.freecivweb.com/","🏛️"),
+("Mindustry","Strategy","Factory-building and resource management","https://mindustrygame.github.io/","⚙️"),
+("BrowserQuest","Adventure","Open-source multiplayer RPG experiment","https://browserquest.mozilla.org/","🗡️"),
+("The House","Adventure","Point-and-click room exploration puzzle","https://www.open-games.org/","🏠"),
+("Untrusted","Puzzle","JavaScript-code-based roguelike puzzles","https://alexnisnevich.github.io/untrusted/","💻"),
+("SkiFree","Arcade","Classic downhill skiing game remake","https://ski.ihoc.net/","⛷️"),
+("Asteroids","Arcade","Classic vector-style space arcade game","https://www.freeasteroids.org/","☄️"),
+("Little Alchemy","Puzzle","Combine elements to discover new items","https://littlealchemy.com/","🧪"),
+("The Password Game","Puzzle","Solve a puzzle with changing rules","https://neal.fun/password-game/","🔐"),
+("Infinite Craft","Crafting","Combine concepts into new discoveries","https://neal.fun/infinite-craft/","🌱"),
+("Townscaper","Sandbox","Build a tiny colorful town","https://oskarstalberg.com/Townscaper/","🏘️"),
+("Falling Sand","Sandbox","Play with sand-like particles","https://sandspiel.club/","🏖️"),
+("Akinator","Guessing","Think of a character and answer questions","https://en.akinator.com/","🧞"),
+("The Impossible Quiz","Quiz","Answer trick questions and puzzles","https://www.coolmathgames.com/0-the-impossible-quiz","❓"),
+("Piano Tiles","Rhythm","Tap the tiles in time","https://poki.com/en/g/piano-tiles-2","🎹"),
+("Friday Night Funkin'","Rhythm","Open-source rhythm game with music battles","https://ninja-muffin24.itch.io/funkin","🎤"),
+("osu!","Rhythm","Rhythm game with community beatmaps","https://osu.ppy.sh/","🎵"),
+("Incredibox","Music","Create music with animated beatboxers","https://www.incredibox.com/","🎶"),
+("Chrome Music Lab","Music","Play with interactive music experiments","https://musiclab.chromeexperiments.com/","🎼"),
+("Blob Opera","Music","Create opera melodies with animated blobs","https://artsandculture.google.com/experiment/blob-opera/AAHWrq360NcGbw","🎙️"),
+("Patatap","Music","Keyboard-driven sound and animation toy","https://patatap.com/","🎹"),
+("Weavesilk","Art","Create glowing symmetrical drawings","https://weavesilk.com/","🪄"),
+("AutoDraw","Art","Draw with machine-learning suggestions","https://www.autodraw.com/","🖌️"),
+("Quick Draw","Art","Sketch objects for a guessing challenge","https://quickdraw.withgoogle.com/","✏️"),
+("Skribbl","Party","Draw and guess with other players","https://skribbl.io/","🎨"),
+("Gartic Phone","Party","A drawing-and-caption telephone game","https://garticphone.com/","☎️"),
+("Make It Meme","Party","Create and vote on memes with friends","https://makeitmeme.com/","😂"),
+("JKLM Fun","Party","Browse multiplayer party games","https://jklm.fun/","🎉"),
+("Board Game Arena","Board","Play board games online with others","https://boardgamearena.com/","🎲"),
+("Tabletopia","Board","Digital tabletop board-game platform","https://tabletopia.com/","🎲"),
+("PlayingCards.io","Card","Create virtual card and tabletop rooms","https://playingcards.io/","🃏"),
+("CardGames.io","Card","Collection of classic card and board games","https://cardgames.io/","♣️"),
+("Solitaired","Card","Solitaire and other card games","https://solitaired.com/","🃏"),
+("Pogo","Game Portal","Browser games and casual puzzles","https://www.pogo.com/","🎮"),
+("Kongregate","Game Portal","Browse indie and casual web games","https://www.kongregate.com/","🕹️"),
+("Newgrounds","Game Portal","Browse indie games and animations","https://www.newgrounds.com/games","🎮"),
+("itch.io HTML5","Game Portal","Browse indie HTML5 games","https://itch.io/games/html5","🕹️"),
+("Poki Games","Game Portal","Browse free browser games","https://poki.com/","🎮"),
+("CrazyGames","Game Portal","Browse free browser games by genre","https://www.crazygames.com/","🎮"),
+("GamePix","Game Portal","Browse HTML5 browser games","https://www.gamepix.com/","🎮"),
+("Y8 Games","Game Portal","Browse online browser games","https://www.y8.com/","🎮"),
+("Kizi","Game Portal","Browse casual browser games","https://kizi.com/","🎮"),
+("Miniclip","Game Portal","Browse casual and multiplayer games","https://www.miniclip.com/","🎮"),
+("Armor Games","Game Portal","Browse strategy and adventure web games","https://armorgames.com/","🛡️"),
+("Gameflare","Game Portal","Browse free online games","https://www.gameflare.com/","🎮"),
+("Addicting Games","Game Portal","Browse casual web games","https://www.addictinggames.com/","🎮"),
+("A10","Game Portal","Browse online games","https://www.a10.com/","🎮"),
+("PlayHop","Game Portal","Browse web-based games","https://playhop.com/","🎮"),
+("Minix Games","Game Portal","Browse browser games and puzzles","https://minix.games/browser-games","🎮"),
+("Open Games","Open Source","Open-source browser games directory","https://www.open-games.org/","🌐"),
+("Open Awesome","Open Source","Open-source browser game directory","https://open-awesome.com/tags/browser-game","📂"),
+("ArcadeBloom","Indie Games","Curated indie browser games","https://arcadebloom.com/","🌸"),
+("GitHub Browser Games","Open Source","Browse open-source browser-game projects","https://github.com/topics/browser-game","💻"),
+("GitHub HTML5 Games","Open Source","Browse HTML5 game projects","https://github.com/topics/html5-game","💻"),
+("GitHub JavaScript Games","Open Source","Browse JavaScript game projects","https://github.com/topics/javascript-game","💻"),
+("GitHub Phaser Games","Open Source","Browse Phaser game projects","https://github.com/topics/phaser-game","💻"),
+("GitHub Three.js Games","Open Source","Browse Three.js game projects","https://github.com/topics/threejs-game","💻"),
+("Google Arts & Culture Games","Education","Interactive art and culture experiments","https://artsandculture.google.com/experiment","🎨"),
+("NASA Eyes","Exploration","Explore planets and missions interactively","https://eyes.nasa.gov/","🪐"),
+("Earth Nullschool","Exploration","Explore global weather patterns","https://earth.nullschool.net/","🌍"),
+("Radio Garden","Exploration","Explore live radio around the world","https://radio.garden/","📻"),
+("WindowSwap","Exploration","View windows around the world","https://www.window-swap.com/","🪟"),
+("MapCrunch","Exploration","Explore random street-view locations","https://www.mapcrunch.com/","🗺️"),
+("Drive & Listen","Exploration","Watch drives through cities with radio","https://driveandlisten.herokuapp.com/","🚗"),
+("A Soft Murmur","Relax","Mix ambient sounds","https://asoftmurmur.com/","🌧️"),
+("Noisli","Relax","Create a custom ambient sound mix","https://www.noisli.com/","🌿"),
+("Little Alchemy 2","Crafting","Combine elements into discoveries","https://littlealchemy2.com/","🧪"),
+("Doodle Jump","Arcade","Jump upward through endless platforms","https://poki.com/en/g/doodle-jump","🦘"),
+("Crossy Road","Arcade","Hop across roads and rivers","https://poki.com/en/g/crossy-road","🐔"),
+("Subway Surfers","Arcade","Endless runner through city tracks","https://poki.com/en/g/subway-surfers","🚇"),
+("Temple Run 2","Arcade","Endless running and obstacle dodging","https://poki.com/en/g/temple-run-2","🏃"),
+("Basketball Stars","Sports","Arcade-style basketball matches","https://www.crazygames.com/game/basketball-stars","🏀"),
+("Football Legends","Sports","Arcade football matches","https://www.crazygames.com/game/football-legends-2021","⚽"),
+("Soccer Skills World Cup","Sports","3D football skill matches","https://www.crazygames.com/game/soccer-skills-world-cup","⚽"),
+("Basketball.io","Sports","Casual basketball game","https://poki.com/en/g/basketball-io","🏀"),
+("8 Ball Pool","Sports","Online pool game","https://www.miniclip.com/games/8-ball-pool-multiplayer/en/","🎱"),
+("Table Tennis World Tour","Sports","Arcade table tennis","https://www.crazygames.com/game/table-tennis-world-tour","🏓"),
+("Golf Battle","Sports","Mini golf challenges","https://www.miniclip.com/games/golf-battle/en/","⛳"),
+("Chess","Board","Play chess online","https://lichess.org/","♟️"),
+("Ludo King","Board","Classic Ludo board game","https://ludoking.com/","🎲"),
+("Checkers Online","Board","Play checkers online","https://cardgames.io/checkers/","🔴"),
+("Backgammon Online","Board","Play backgammon online","https://cardgames.io/backgammon/","🎲"),
+("Reversi","Board","Classic Othello-style strategy","https://cardgames.io/reversi/","⚪"),
+("Four in a Row","Board","Connect four tokens to win","https://cardgames.io/connect4/","🔴"),
+("Battleship Board Game","Board","Classic hidden-grid strategy board game","https://papergames.io/en/battleship","🚢"),
+("Dots and Boxes","Board","Claim squares by drawing lines","https://papergames.io/en/dots-and-boxes","🔲"),
+("Mastermind","Puzzle","Deduce a hidden color sequence","https://www.webgamesonline.com/mastermind/","🧠"),
+("Lights Out","Puzzle","Toggle lights to solve the board","https://www.logicgamesonline.com/lightsout/","💡"),
+("Sliding Puzzle","Puzzle","Rearrange tiles into order","https://www.proprofs.com/games/puzzle/sliding/","🧩"),
+("Tower of Hanoi","Puzzle","Move discs under classic constraints","https://www.mathsisfun.com/games/towerofhanoi.html","🗼"),
+("2048 Cupcakes","Puzzle","A themed version of the number puzzle","https://www.2048cupcakes.com/","🧁"),
+("Threes","Puzzle","Slide number tiles and combine values","https://play.threesgame.com/","🔢"),
+("Word Cookies","Word","Find words from letter sets","https://www.crazygames.com/game/word-cookies","🍪"),
+("Word Connect","Word","Connect letters to find words","https://www.crazygames.com/game/word-connect","🔤"),
+("Daily Word Search","Word","Find words hidden in letter grids","https://thewordsearch.com/","🔎"),
+("Crossword Labs","Word","Create and solve crossword puzzles","https://crosswordlabs.com/","✍️"),
+("Typing.com","Skill","Practice typing and keyboard accuracy","https://www.typing.com/","⌨️"),
+("Nitro Type","Skill","Typing races against other players","https://www.nitrotype.com/","🏁"),
+("Keybr","Skill","Typing practice with adaptive lessons","https://www.keybr.com/","⌨️"),
+("Chess Puzzle","Skill","Solve tactical chess positions","https://lichess.org/training","♟️"),
+("Daily Sudoku","Puzzle","Play a daily Sudoku challenge","https://sudoku.com/","🔢"),
+("Jigsaw Puzzles","Puzzle","Browse online jigsaw puzzles","https://www.jigsawexplorer.com/","🧩"),
+("Color by Number","Relax","Color pictures by numbered regions","https://www.thecolor.com/","🎨"),
+("Pixel Art","Art","Create small pixel drawings","https://www.pixilart.com/draw","🟪"),
+("Sketchpad","Art","Draw and paint in the browser","https://sketch.io/sketchpad/","🖌️"),
+("Kleki","Art","Browser-based drawing and painting","https://kleki.com/","🎨"),
+("AutoDraw","Art","Draw with smart shape suggestions","https://www.autodraw.com/","🖍️"),
+("Bouncy Balls","Relax","Interact with bouncing balls using sound","https://bouncyballs.org/","🔵"),
+("Pointer Pointer","Surprise","Find a photo pointing at your cursor","https://pointerpointer.com/","👉"),
+("The Useless Web","Surprise","Visit a random playful website","https://theuselessweb.com/","🎲"),
+("Staggering Beauty","Surprise","A quirky interactive motion experiment","https://www.staggeringbeauty.com/","🪱"),
+("Zoomquilt","Art","Explore an endless zooming artwork","https://zoomquilt.org/","🌀"),
+("Silk","Art","Create glowing generative art","https://weavesilk.com/","✨"),
+("Neal.fun Universe Forecast","Exploration","Explore scale and space","https://neal.fun/size-of-space/","🌌"),
+("Neal.fun Life Stats","Exploration","Explore life and time statistics","https://neal.fun/life-stats/","📊"),
+("Neal.fun Space Elevator","Exploration","Explore a conceptual trip into space","https://neal.fun/space-elevator/","🛰️"),
+("Neal.fun Deep Sea","Exploration","Explore the ocean by depth","https://neal.fun/deep-sea/","🐋"),
+("Worldometer","Trivia","Explore live global population statistics","https://www.worldometers.info/","🌍"),
+("Sporcle Geography","Trivia","Geography quizzes and map challenges","https://www.sporcle.com/games/category/geography","🗺️"),
+("JetPunk Countries","Trivia","Name countries from memory","https://www.jetpunk.com/quizzes/how-many-countries-can-you-name","🌎"),
+("Flag Quiz","Trivia","Practice identifying world flags","https://www.flagle.io/","🏳️"),
+("Seterra Maps","Geography","Learn countries, capitals, and regions","https://www.geoguessr.com/seterra","🗺️"),
+("GeoGuessr","Geography","Explore places and guess locations","https://www.geoguessr.com/","🌍"),
+("Worldle","Geography","Guess countries from their outlines","https://worldle.teuteuf.fr/","🌍"),
+("Globle","Geography","Find the mystery country by distance","https://globle-game.com/","🌐"),
+("Travle","Geography","Find a route between countries","https://travle.earth/","🧭"),
+("Nerdle","Math Puzzle","Guess a mathematical equation","https://nerdlegame.com/","➗"),
+("Mathler","Math Puzzle","Solve a hidden arithmetic equation","https://mathler.com/","➕"),
+("Waffle","Word","Solve a grid by swapping letters","https://wafflegame.net/","🧇"),
+("Quordle","Word","Solve four words at once","https://www.merriam-webster.com/games/quordle/","🔠"),
+("Octordle","Word","Solve eight words at once","https://octordle.com/","🔡"),
+("Wordle","Word","Daily word guessing puzzle","https://www.nytimes.com/games/wordle/index.html","🔤"),
+("Connections","Word","Sort words into four groups","https://www.nytimes.com/games/connections","🔗"),
+("Framed","Film Puzzle","Guess a movie from images","https://framed.wtf/","🎬"),
+("Guess the Game","Trivia","Identify a video game from a screenshot","https://guessthe.game/","🎮"),
+("Heardle-style Music Quiz","Music Puzzle","Try music guessing games","https://www.sporcle.com/games/tags/music","🎧"),
+("Piano Tiles 2","Rhythm","Tap tiles to follow the music","https://poki.com/en/g/piano-tiles-2","🎹"),
+("Incredibox","Music","Build a beatbox music mix","https://www.incredibox.com/","🎶"),
+("Friday Night Funkin'","Rhythm","Open-source rhythm game","https://ninja-muffin24.itch.io/funkin","🎤"),
+("osu!","Rhythm","Rhythm game and community beatmaps","https://osu.ppy.sh/","🎵"),
+("Chrome Music Lab","Music","Interactive music experiments","https://musiclab.chromeexperiments.com/","🎼"),
+("Song Maker","Music","Compose music using a grid","https://musiclab.chromeexperiments.com/Song-Maker/","🎹"),
+("Rhythm","Music","Create rhythmic patterns","https://musiclab.chromeexperiments.com/Rhythm/","🥁"),
+("Freeciv Web","Strategy","Turn-based civilization building","https://www.freecivweb.com/","🏛️"),
+("Mini Metro","Strategy","Plan a city's transit network","https://dinopoloclub.com/minimetro/","🚇"),
+("Mindustry","Strategy","Build factories and manage resources","https://mindustrygame.github.io/","⚙️"),
+("OpenTTD","Simulation","Build and manage transport networks","https://www.openttd.org/","🚂"),
+("Townscaper","Sandbox","Build colorful little towns","https://oskarstalberg.com/Townscaper/","🏘️"),
+("3D City","Simulation","Build and explore a browser city","https://3d.city/","🏙️"),
+("GeoFS","Simulation","Browser-based flight simulator","https://www.geo-fs.com/","✈️"),
+("PhET Simulations","Simulation","Interactive science experiments","https://phet.colorado.edu/en/simulations","🧪"),
+("Universe Sandbox website","Exploration","Explore astronomy and gravity resources","https://universesandbox.com/","🪐"),
+("Fallen London","RPG","Narrative role-playing in a strange city","https://www.fallenlondon.com/","🕯️"),
+("Kingdom of Loathing","RPG","Comedy role-playing adventure","https://www.kingdomofloathing.com/","👑"),
+("Neopets","Virtual World","Virtual pets and mini-games","https://www.neopets.com/","🐾"),
+("Poptropica","Adventure","Explore islands and solve quests","https://www.poptropica.com/","🏝️"),
+("A Dark Room","Adventure","Text adventure with incremental elements","https://adarkroom.doublespeakgames.com/","🌒"),
+("Untrusted","Puzzle","Solve puzzles by editing JavaScript","https://alexnisnevich.github.io/untrusted/","💻"),
+("BrowserQuest","Adventure","Open-source browser RPG project","https://browserquest.mozilla.org/","🧭"),
+("The Wiki Game","Puzzle","Race between Wikipedia pages","https://www.thewikigame.com/","📚"),
+("Little Alchemy 2","Crafting","Combine objects and ideas","https://littlealchemy2.com/","🧪"),
+("Cookie Clicker","Clicker","Bake cookies and buy upgrades","https://orteil.dashnet.org/cookieclicker/","🍪"),
+("Universal Paperclips","Clicker","Grow a paperclip-making operation","https://www.decisionproblem.com/paperclips/","📎"),
+("Particle Clicker","Clicker","Unlock research upgrades by clicking","https://particle-clicker.web.cern.ch/","⚛️"),
+("Idle Breakout","Clicker","Break bricks and purchase upgrades","https://www.coolmathgames.com/0-idle-breakout","🧱"),
+("Neal.fun Stimulation Clicker","Clicker","A satirical incremental clicker","https://neal.fun/stimulation-clicker/","🖱️"),
+("Clicker Heroes","Clicker","Incremental monster-battling clicker","https://www.clickerheroes.com/","✨"),
+("Adventure Capitalist","Clicker","Build an incremental business empire","https://www.crazygames.com/game/adventure-capitalist","💼"),
+("Idle Miner Tycoon","Simulation","Manage a mining business","https://www.crazygames.com/game/idle-miner-tycoon","⛏️"),
+("Goodgame Big Farm","Simulation","Manage a farm in a browser","https://bigfarm.goodgamestudios.com/","🌾"),
+("Little Farm Clicker","Clicker","Grow a farm with incremental upgrades","https://www.crazygames.com/","🌱"),
+("Agar.io","Multiplayer","Grow a cell in a shared arena","https://agar.io/","🟣"),
+("Slither.io","Multiplayer","Grow a snake and compete online","https://slither.io/","🐍"),
+("Skribbl.io","Party","Draw and guess with friends","https://skribbl.io/","🎨"),
+("Gartic Phone","Party","Draw-and-caption party game","https://garticphone.com/","☎️"),
+("Make It Meme","Party","Make memes with friends","https://makeitmeme.com/","😂"),
+("JKLM Fun","Party","Online party games","https://jklm.fun/","🎉"),
+("Chess.com","Board","Chess matches and puzzles","https://www.chess.com/play","♟️"),
+("Lichess","Board","Free chess and puzzles","https://lichess.org/","♟️"),
+("Board Game Arena","Board","Online board game collection","https://boardgamearena.com/","🎲"),
+("Tabletopia","Board","Digital tabletop board games","https://tabletopia.com/","🎲"),
+("PlayingCards.io","Card","Play card games in virtual rooms","https://playingcards.io/","🃏"),
+("CardGames.io","Card","Classic cards, dice, and board games","https://cardgames.io/","♣️"),
+("Solitaired","Card","Play solitaire and card games","https://solitaired.com/","🃏"),
+("Poki","Game Portal","Browse a broad browser-game catalog","https://poki.com/","🎮"),
+("CrazyGames","Game Portal","Browse browser games by category","https://www.crazygames.com/","🎮"),
+("itch.io HTML5","Game Portal","Browse indie games made for browsers","https://itch.io/games/html5","🕹️"),
+("Newgrounds Games","Game Portal","Browse indie browser games","https://www.newgrounds.com/games","🎮"),
+("Open Games","Open Source","Browse open-source HTML5 games","https://www.open-games.org/","🌐"),
+("ArcadeBloom","Indie Games","Browse curated indie browser games","https://arcadebloom.com/","🌸"),
+("GitHub Browser Games","Open Source","Explore open-source browser games","https://github.com/topics/browser-game","💻"),
+("Minix Games","Game Portal","Browse online puzzles and arcade games","https://minix.games/browser-games","🎮"),
+("Coolmath Games","Game Portal","Browse puzzle and casual games","https://www.coolmathgames.com/","🎮"),
+("Y8 Games","Game Portal","Browse online games","https://www.y8.com/","🎮"),
+("Kizi","Game Portal","Browse casual browser games","https://kizi.com/","🎮"),
+("Miniclip","Game Portal","Browse casual and multiplayer games","https://www.miniclip.com/","🎮"),
+("Armor Games","Game Portal","Browse strategy and adventure games","https://armorgames.com/","🛡️"),
+("Addicting Games","Game Portal","Browse casual web games","https://www.addictinggames.com/","🎮"),
+("GamePix","Game Portal","Browse HTML5 games","https://www.gamepix.com/","🎮"),
+("Gameflare","Game Portal","Browse free online games","https://www.gameflare.com/","🎮"),
+("Pogo","Game Portal","Browse casual browser games","https://www.pogo.com/","🎮"),
+("Game Jolt","Indie Games","Browse indie game projects","https://gamejolt.com/","🎮"),
+("Google Arts & Culture Experiments","Interactive","Explore interactive art projects","https://artsandculture.google.com/experiment","🎨"),
+("NASA Space Place","Education","Play space and science games","https://spaceplace.nasa.gov/menu/play/","🚀"),
+("World Geography Games","Education","Play interactive geography quizzes","https://world-geography-games.com/","🌎"),
+("Sporcle","Trivia","Browse trivia games and quizzes","https://www.sporcle.com/","❓"),
+("JetPunk","Trivia","Browse geography and knowledge quizzes","https://www.jetpunk.com/","🧠"),
+("Human Benchmark","Skill","Test memory and reaction speed","https://humanbenchmark.com/","🧠"),
+("Monkeytype","Skill","Typing speed test","https://monkeytype.com/","⌨️"),
+("Keybr","Skill","Typing practice","https://www.keybr.com/","⌨️"),
+("TypingClub","Skill","Interactive typing lessons","https://www.typingclub.com/","⌨️"),
+("Aim Trainer","Skill","Practice mouse precision","https://aimtrainer.io/","🎯"),
+("Radio Garden","Exploration","Explore radio stations around the globe","https://radio.garden/","📻"),
+("WindowSwap","Exploration","See views from windows around the world","https://www.window-swap.com/","🪟"),
+("MapCrunch","Exploration","Explore random street-view places","https://www.mapcrunch.com/","🗺️"),
+("Earth Nullschool","Exploration","Visualize global weather and ocean patterns","https://earth.nullschool.net/","🌍"),
+("NASA Eyes","Exploration","Explore planets and space missions","https://eyes.nasa.gov/","🪐"),
+("Drive & Listen","Exploration","Watch city drives with local radio","https://driveandlisten.herokuapp.com/","🚗"),
+("A Soft Murmur","Relax","Mix ambient sounds","https://asoftmurmur.com/","🌧️"),
+("Noisli","Relax","Create ambient soundscapes","https://www.noisli.com/","🌿"),
+("Bouncy Balls","Relax","Play with bouncing balls and sound","https://bouncyballs.org/","🔵"),
+("The Useless Web","Surprise","Discover a random fun website","https://theuselessweb.com/","🎲"),
+("Pointer Pointer","Surprise","A silly cursor-based photo experiment","https://pointerpointer.com/","👉"),
+("Weavesilk","Art","Create luminous generative art","https://weavesilk.com/","✨"),
+("Kleki","Art","Paint and draw in your browser","https://kleki.com/","🎨"),
+("Sketchpad","Art","Browser drawing studio","https://sketch.io/sketchpad/","🖌️"),
+("AutoDraw","Art","Draw with smart suggestions","https://www.autodraw.com/","🖍️"),
+("Pixilart","Art","Create pixel art in the browser","https://www.pixilart.com/draw","🟪"),
+("Sandspiel","Sandbox","Experiment with particle materials","https://sandspiel.club/","🏖️"),
+("Patatap","Music","Create sounds with keyboard presses","https://patatap.com/","🎹"),
+("Chrome Music Lab","Music","Interactive music experiments","https://musiclab.chromeexperiments.com/","🎼"),
+("Song Maker","Music","Compose melodies on a grid","https://musiclab.chromeexperiments.com/Song-Maker/","🎵"),
+("Rhythm Lab","Music","Build rhythm patterns","https://musiclab.chromeexperiments.com/Rhythm/","🥁"),
+("Incredibox","Music","Create beatbox mixes","https://www.incredibox.com/","🎶"),
+("Blob Opera","Music","Play with a virtual opera group","https://artsandculture.google.com/experiment/blob-opera/AAHWrq360NcGbw","🎤"),
+("Townscaper","Sandbox","Build a colorful town","https://oskarstalberg.com/Townscaper/","🏘️"),
+("3D City","Simulation","Build a city in your browser","https://3d.city/","🏙️"),
+("Mini Metro","Strategy","Design an efficient transit system","https://dinopoloclub.com/minimetro/","🚇"),
+("OpenTTD","Simulation","Build and manage a transport company","https://www.openttd.org/","🚂"),
+("Mindustry","Strategy","Build factories and manage resources","https://mindustrygame.github.io/","⚙️"),
+("Freeciv Web","Strategy","Build a civilization in a browser","https://www.freecivweb.com/","🏛️"),
+("GeoFS","Simulation","Fly around the world in a browser","https://www.geo-fs.com/","✈️"),
+("PhET","Simulation","Try interactive science simulations","https://phet.colorado.edu/en/simulations","🧪"),
+("Fallen London","RPG","Story-rich browser role-playing","https://www.fallenlondon.com/","🕯️"),
+("Kingdom of Loathing","RPG","Comedic text-based RPG","https://www.kingdomofloathing.com/","👑"),
+("Neopets","Virtual World","Virtual pets and mini-games","https://www.neopets.com/","🐾"),
+("Poptropica","Adventure","Explore islands and solve quests","https://www.poptropica.com/","🏝️"),
+("A Dark Room","Adventure","Minimalist narrative adventure","https://adarkroom.doublespeakgames.com/","🌒"),
+("Untrusted","Puzzle","Solve coding-based roguelike puzzles","https://alexnisnevich.github.io/untrusted/","💻"),
+("The Wiki Game","Puzzle","Navigate between Wikipedia articles","https://www.thewikigame.com/","📚"),
+("Little Alchemy 2","Crafting","Combine ideas to discover items","https://littlealchemy2.com/","🧪"),
+("Cookie Clicker","Clicker","Grow a cookie empire","https://orteil.dashnet.org/cookieclicker/","🍪"),
+("Universal Paperclips","Clicker","Incremental paperclip simulation","https://www.decisionproblem.com/paperclips/","📎"),
+("Particle Clicker","Clicker","Incremental particle physics game","https://particle-clicker.web.cern.ch/","⚛️"),
+("Idle Breakout","Clicker","Break bricks and upgrade your power","https://www.coolmathgames.com/0-idle-breakout","🧱"),
+("Neal.fun Infinite Craft","Crafting","Discover combinations in a crafting sandbox","https://neal.fun/infinite-craft/","🌱"),
+("Neal.fun Password Game","Puzzle","Solve a puzzle with evolving rules","https://neal.fun/password-game/","🔐"),
+("Neal.fun Stimulation Clicker","Clicker","A satirical incremental clicker","https://neal.fun/stimulation-clicker/","🖱️"),
+("SkiFree","Arcade","Classic downhill skiing game","https://ski.ihoc.net/","⛷️"),
+("Asteroids Classic","Arcade","Classic space arcade game","https://www.freeasteroids.org/","☄️"),
+("Pong","Arcade","Classic paddle game","https://www.ponggame.org/","🏓"),
+("Dino Run","Arcade","Endless runner with a dinosaur","https://chromedino.com/","🦖"),
+("Slope","Arcade","Guide a ball down a neon track","https://www.coolmathgames.com/0-slope","🟢"),
+("Run 3","Platformer","Navigate space tunnels","https://www.coolmathgames.com/0-run-3","🏃"),
+("Fireboy and Watergirl","Platformer","Solve co-op platform puzzles","https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple","🔥"),
+("Cut the Rope","Puzzle","Solve physics puzzles with candy","https://www.crazygames.com/game/cut-the-rope","🍬"),
+("Drift Hunters","Racing","Drift and tune cars","https://www.drifthunters.com/","🚗"),
+("Polytrack","Racing","Race on low-poly time trials","https://polytrack.org/","🏁"),
+("Moto X3M","Racing","Ride through obstacle courses","https://www.coolmathgames.com/0-moto-x3m","🏍️"),
+("Madalin Stunt Cars 2","Racing","Drive and perform stunts","https://www.madalingames.com/madalin-stunt-cars-2/","🚘"),
+("TETR.IO","Puzzle","Fast multiplayer block puzzle","https://tetr.io/","🟪"),
+("Jstris","Puzzle","Fast browser block-stacking game","https://jstris.jezeve.com/","🟦"),
+("Slither.io","Multiplayer","Grow a snake in a shared arena","https://slither.io/","🐍"),
+("Agar.io","Multiplayer","Grow a cell and avoid bigger cells","https://agar.io/","🟣"),
+("Piano Tiles","Rhythm","Tap tiles to match the rhythm","https://poki.com/en/g/piano-tiles-2","🎹"),
+("Doodle Jump","Arcade","Jump across endless platforms","https://poki.com/en/g/doodle-jump","🦘"),
+("Crossy Road","Arcade","Hop across roads and rivers","https://poki.com/en/g/crossy-road","🐔"),
+("Subway Surfers","Arcade","Run through busy tracks","https://poki.com/en/g/subway-surfers","🚇"),
+("Temple Run 2","Arcade","Run and dodge obstacles","https://poki.com/en/g/temple-run-2","🏃"),
+("Basketball Stars","Sports","Arcade basketball matches","https://www.crazygames.com/game/basketball-stars","🏀"),
+("Football Legends","Sports","Arcade football matches","https://www.crazygames.com/game/football-legends-2021","⚽"),
+("Soccer Skills World Cup","Sports","Play 3D football matches","https://www.crazygames.com/game/soccer-skills-world-cup","⚽"),
+("8 Ball Pool","Sports","Play pool online","https://www.miniclip.com/games/8-ball-pool-multiplayer/en/","🎱"),
+("Table Tennis World Tour","Sports","Play arcade table tennis","https://www.crazygames.com/game/table-tennis-world-tour","🏓"),
+("Golf Battle","Sports","Compete in mini golf","https://www.miniclip.com/games/golf-battle/en/","⛳"),
+("Tic-Tac-Toe","Board","Classic three-in-a-row","https://playtictactoe.org/","⭕"),
+("Checkers","Board","Classic checkers online","https://cardgames.io/checkers/","🔴"),
+("Backgammon","Board","Classic backgammon online","https://cardgames.io/backgammon/","🎲"),
+("Mahjong Solitaire","Puzzle","Match open tile pairs","https://www.247mahjong.com/","🀄"),
+("Solitaire","Card","Classic Klondike solitaire","https://solitaired.com/","🃏"),
+("FreeCell","Card","Plan moves to clear all cards","https://cardgames.io/freecell/","♣️"),
+("Spider Solitaire","Card","Arrange descending card sequences","https://cardgames.io/spidersolitaire/","🕷️"),
+("Hearts","Card","Trick-taking card game","https://cardgames.io/hearts/","♥️"),
+("Yahtzee","Dice","Roll dice and score combinations","https://cardgames.io/yahtzee/","🎲"),
+("World Geography Games","Geography","Interactive map quizzes","https://world-geography-games.com/","🌎"),
+("JetPunk","Trivia","Geography and general knowledge quizzes","https://www.jetpunk.com/","🧠"),
+("Sporcle","Trivia","Timed trivia challenges","https://www.sporcle.com/","❓"),
+("Monkeytype","Skill","Typing speed and accuracy test","https://monkeytype.com/","⌨️"),
+("Human Benchmark","Skill","Memory and reaction tests","https://humanbenchmark.com/","🧠"),
+("TypingClub","Skill","Learn touch typing","https://www.typingclub.com/","⌨️"),
+("Keybr","Skill","Adaptive typing practice","https://www.keybr.com/","⌨️"),
+("Radio Garden","Exploration","Explore radio stations worldwide","https://radio.garden/","📻"),
+("WindowSwap","Exploration","Explore views from real windows","https://www.window-swap.com/","🪟"),
+("MapCrunch","Exploration","Visit random street-view locations","https://www.mapcrunch.com/","🗺️"),
+("Earth Nullschool","Exploration","Explore global weather patterns","https://earth.nullschool.net/","🌍"),
+("NASA Eyes","Exploration","Explore planets and space missions","https://eyes.nasa.gov/","🪐"),
+("A Soft Murmur","Relax","Mix relaxing ambient sounds","https://asoftmurmur.com/","🌧️"),
+("Noisli","Relax","Build ambient soundscapes","https://www.noisli.com/","🌿"),
+("Weavesilk","Art","Create glowing symmetrical drawings","https://weavesilk.com/","✨"),
+("Kleki","Art","Draw and paint in the browser","https://kleki.com/","🎨"),
+("Sketchpad","Art","Browser drawing and painting","https://sketch.io/sketchpad/","🖌️"),
+("Pixilart","Art","Create pixel art","https://www.pixilart.com/draw","🟪"),
+("Patatap","Music","Keyboard sound and animation toy","https://patatap.com/","🎹"),
+("Incredibox","Music","Create beatbox mixes","https://www.incredibox.com/","🎶"),
+("Song Maker","Music","Compose melodies in a grid","https://musiclab.chromeexperiments.com/Song-Maker/","🎵"),
+("NASA Space Place Games","Education","Space and science mini-games","https://spaceplace.nasa.gov/menu/play/","🚀"),
+("PhET Simulations","Education","Interactive science simulations","https://phet.colorado.edu/en/simulations","🧪"),
+("The Useless Web","Surprise","Discover random playful sites","https://theuselessweb.com/","🎲"),
+("Pointer Pointer","Surprise","Find the image pointing at your cursor","https://pointerpointer.com/","👉"),
+("Zoomquilt","Art","Explore an infinite zooming image","https://zoomquilt.org/","🌀"),
+("Akinator","Guessing","Answer questions to guess a character","https://en.akinator.com/","🧞"),
+("The Impossible Quiz","Quiz","Solve trick questions","https://www.coolmathgames.com/0-the-impossible-quiz","❓"),
+("Word Search","Word","Find hidden words in a grid","https://thewordsearch.com/","🔎"),
+("Crossword Labs","Word","Create and solve crosswords","https://crosswordlabs.com/","✍️"),
+("Kakuro","Puzzle","Solve cross-sum logic puzzles","https://www.kakuro-online.com/","➕"),
+("KenKen","Puzzle","Solve arithmetic grid puzzles","https://www.kenkenpuzzle.com/","➗"),
+("Lights Out","Puzzle","Toggle lights to solve the board","https://www.logicgamesonline.com/lightsout/","💡"),
+("Tower of Hanoi","Puzzle","Solve the classic disc-moving puzzle","https://www.mathsisfun.com/games/towerofhanoi.html","🗼"),
+("Mastermind","Puzzle","Deduce a hidden code","https://www.webgamesonline.com/mastermind/","🧠"),
+("Jigsaw Explorer","Puzzle","Play online jigsaw puzzles","https://www.jigsawexplorer.com/","🧩"),
+("Jigsaw Planet","Puzzle","Community-made jigsaw puzzles","https://www.jigsawplanet.com/","🧩"),
+("Board Game Arena","Board","Play board games online","https://boardgamearena.com/","🎲"),
+("Tabletopia","Board","Play digital tabletop games","https://tabletopia.com/","🎲"),
+("PlayingCards.io","Card","Play virtual card games with friends","https://playingcards.io/","🃏"),
+("Game Jolt","Indie Games","Browse indie game projects","https://gamejolt.com/","🎮"),
+("Newgrounds Games","Indie Games","Browse indie browser games","https://www.newgrounds.com/games","🎮"),
+("itch.io HTML5","Indie Games","Browse games designed for browsers","https://itch.io/games/html5","🕹️"),
+("GitHub Browser Games","Open Source","Explore browser-game source projects","https://github.com/topics/browser-game","💻"),
+("Open Awesome Browser Games","Open Source","Browse open-source browser games","https://open-awesome.com/tags/browser-game","📂"),
+("ArcadeBloom","Indie Games","Curated indie browser games","https://arcadebloom.com/","🌸"),
+("Minix Games","Game Portal","Browse online puzzles and arcade games","https://minix.games/browser-games","🎮"),
+("Poki","Game Portal","Browse free browser games","https://poki.com/","🎮"),
+("CrazyGames","Game Portal","Browse free browser games","https://www.crazygames.com/","🎮"),
+("Coolmath Games","Game Portal","Browse puzzle and casual games","https://www.coolmathgames.com/","🎮"),
+("Y8","Game Portal","Browse online games","https://www.y8.com/","🎮"),
+("Kizi","Game Portal","Browse casual games","https://kizi.com/","🎮"),
+("Miniclip","Game Portal","Browse casual and multiplayer games","https://www.miniclip.com/","🎮"),
+("Armor Games","Game Portal","Browse strategy and adventure games","https://armorgames.com/","🛡️"),
+("Addicting Games","Game Portal","Browse casual games","https://www.addictinggames.com/","🎮"),
+("GamePix","Game Portal","Browse HTML5 games","https://www.gamepix.com/","🎮"),
+("Gameflare","Game Portal","Browse free online games","https://www.gameflare.com/","🎮"),
+("Pogo","Game Portal","Browse casual games","https://www.pogo.com/","🎮"),
+("Playhop","Game Portal","Browse browser games","https://playhop.com/","🎮"),
+("Neal.fun","Interactive","Explore a collection of playful web experiments","https://neal.fun/","✨"),
+("Google Arts & Culture","Interactive","Explore interactive art and culture experiments","https://artsandculture.google.com/experiment","🎨"),
+("NASA Eyes","Exploration","Explore the solar system","https://eyes.nasa.gov/","🪐"),
+("Worldle","Geography","Guess countries from silhouettes","https://worldle.teuteuf.fr/","🌍"),
+("Globle","Geography","Guess the hidden country","https://globle-game.com/","🌐"),
+("Travle","Geography","Find a route between countries","https://travle.earth/","🧭"),
+("Flagle","Geography","Guess a flag from clues","https://www.flagle.io/","🏳️"),
+("GeoGuessr","Geography","Explore locations around the world","https://www.geoguessr.com/","🌎"),
+("Seterra","Geography","Practice geography map quizzes","https://www.geoguessr.com/seterra","🗺️"),
+("Skribbl.io","Party","Draw and guess with friends","https://skribbl.io/","🎨"),
+("Gartic Phone","Party","Drawing telephone party game","https://garticphone.com/","☎️"),
+("Make It Meme","Party","Create and guess memes","https://makeitmeme.com/","😂"),
+("JKLM Fun","Party","Play party games online","https://jklm.fun/","🎉"),
+("Poptropica","Adventure","Explore islands and solve quests","https://www.poptropica.com/","🏝️"),
+("Neopets","Virtual World","Virtual pets and mini-games","https://www.neopets.com/","🐾"),
+("Fallen London","RPG","Story-driven role-playing","https://www.fallenlondon.com/","🕯️"),
+("Kingdom of Loathing","RPG","Comedic text RPG","https://www.kingdomofloathing.com/","👑"),
+("A Dark Room","Adventure","Minimalist text adventure","https://adarkroom.doublespeakgames.com/","🌒"),
+("Untrusted","Puzzle","Code-based puzzle adventure","https://alexnisnevich.github.io/untrusted/","💻"),
+("BrowserQuest","Adventure","Open-source browser RPG","https://browserquest.mozilla.org/","🧭"),
+("Little Alchemy 2","Crafting","Combine items to discover new ones","https://littlealchemy2.com/","🧪"),
+("Cookie Clicker","Clicker","Incremental cookie game","https://orteil.dashnet.org/cookieclicker/","🍪"),
+("Universal Paperclips","Clicker","Incremental paperclip game","https://www.decisionproblem.com/paperclips/","📎"),
+("Particle Clicker","Clicker","Science-themed incremental game","https://particle-clicker.web.cern.ch/","⚛️"),
+("Idle Breakout","Clicker","Incremental brick-breaking game","https://www.coolmathgames.com/0-idle-breakout","🧱"),
+("Neal.fun Infinite Craft","Crafting","Combine concepts in a crafting game","https://neal.fun/infinite-craft/","🌱"),
+("Neal.fun Password Game","Puzzle","Solve a puzzle with evolving rules","https://neal.fun/password-game/","🔐"),
+("Neal.fun Stimulation Clicker","Clicker","Satirical incremental game","https://neal.fun/stimulation-clicker/","🖱️"),
+("Dino Game","Arcade","Endless dinosaur runner","https://chromedino.com/","🦖"),
+("Pong","Arcade","Classic paddle game","https://www.ponggame.org/","🏓"),
+("Asteroids","Arcade","Classic vector arcade game","https://www.freeasteroids.org/","☄️"),
+("Slope","Arcade","Race a ball down a 3D slope","https://www.coolmathgames.com/0-slope","🟢"),
+("Run 3","Platformer","Run through space tunnels","https://www.coolmathgames.com/0-run-3","🏃"),
+("Fireboy and Watergirl","Platformer","Cooperative puzzle platformer","https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple","🔥"),
+("Cut the Rope","Puzzle","Physics-based candy puzzle","https://www.crazygames.com/game/cut-the-rope","🍬"),
+("Drift Hunters","Racing","Car drifting and tuning","https://www.drifthunters.com/","🚗"),
+("Polytrack","Racing","Low-poly racing time trials","https://polytrack.org/","🏁"),
+("Moto X3M","Racing","Motorbike obstacle racing","https://www.coolmathgames.com/0-moto-x3m","🏍️"),
+("Madalin Stunt Cars 2","Racing","Driving and stunt tracks","https://www.madalingames.com/madalin-stunt-cars-2/","🚘"),
+("TETR.IO","Puzzle","Multiplayer falling-block puzzle","https://tetr.io/","🟪"),
+("Jstris","Puzzle","Fast browser block puzzle","https://jstris.jezeve.com/","🟦"),
+("Agar.io","Multiplayer","Grow a cell in an online arena","https://agar.io/","🟣"),
+("Slither.io","Multiplayer","Grow a snake and avoid collisions","https://slither.io/","🐍"),
+("Piano Tiles","Rhythm","Tap tiles in time with music","https://poki.com/en/g/piano-tiles-2","🎹"),
+("Doodle Jump","Arcade","Jump up endless platforms","https://poki.com/en/g/doodle-jump","🦘"),
+("Crossy Road","Arcade","Hop across roads and rivers","https://poki.com/en/g/crossy-road","🐔"),
+("Subway Surfers","Arcade","Endless runner on city tracks","https://poki.com/en/g/subway-surfers","🚇"),
+("Temple Run 2","Arcade","Run and dodge obstacles","https://poki.com/en/g/temple-run-2","🏃"),
+("Basketball Stars","Sports","Arcade basketball","https://www.crazygames.com/game/basketball-stars","🏀"),
+("Football Legends","Sports","Arcade football","https://www.crazygames.com/game/football-legends-2021","⚽"),
+("Soccer Skills World Cup","Sports","3D football skill game","https://www.crazygames.com/game/soccer-skills-world-cup","⚽"),
+("8 Ball Pool","Sports","Online pool","https://www.miniclip.com/games/8-ball-pool-multiplayer/en/","🎱"),
+("Table Tennis World Tour","Sports","Arcade table tennis","https://www.crazygames.com/game/table-tennis-world-tour","🏓"),
+("Golf Battle","Sports","Mini golf challenge","https://www.miniclip.com/games/golf-battle/en/","⛳"),
+("Tic-Tac-Toe","Board","Three-in-a-row","https://playtictactoe.org/","⭕"),
+("Checkers","Board","Classic checkers","https://cardgames.io/checkers/","🔴"),
+("Backgammon","Board","Classic backgammon","https://cardgames.io/backgammon/","🎲"),
+("Mahjong Solitaire","Puzzle","Match tile pairs","https://www.247mahjong.com/","🀄"),
+("Solitaire","Card","Klondike solitaire","https://solitaired.com/","🃏"),
+("FreeCell","Card","Card strategy puzzle","https://cardgames.io/freecell/","♣️"),
+("Spider Solitaire","Card","Arrange descending card sequences","https://cardgames.io/spidersolitaire/","🕷️"),
+("Hearts","Card","Trick-taking card game","https://cardgames.io/hearts/","♥️"),
+("Yahtzee","Dice","Dice and scoring game","https://cardgames.io/yahtzee/","🎲"),
+("World Geography Games","Geography","Interactive map quizzes","https://world-geography-games.com/","🌎"),
+("JetPunk","Trivia","Knowledge and geography quizzes","https://www.jetpunk.com/","🧠"),
+("Sporcle","Trivia","Timed trivia games","https://www.sporcle.com/","❓"),
+("Monkeytype","Skill","Typing speed test","https://monkeytype.com/","⌨️"),
+("Human Benchmark","Skill","Memory and reaction tests","https://humanbenchmark.com/","🧠"),
+("TypingClub","Skill","Typing practice","https://www.typingclub.com/","⌨️"),
+("Keybr","Skill","Adaptive typing practice","https://www.keybr.com/","⌨️"),
+("Radio Garden","Exploration","Explore radio stations worldwide","https://radio.garden/","📻"),
+("WindowSwap","Exploration","View real windows around the world","https://www.window-swap.com/","🪟"),
+("MapCrunch","Exploration","Explore random street-view locations","https://www.mapcrunch.com/","🗺️"),
+("Earth Nullschool","Exploration","Explore weather and ocean patterns","https://earth.nullschool.net/","🌍"),
+("NASA Eyes","Exploration","Explore planets and missions","https://eyes.nasa.gov/","🪐"),
+("A Soft Murmur","Relax","Mix ambient sounds","https://asoftmurmur.com/","🌧️"),
+("Noisli","Relax","Create ambient soundscapes","https://www.noisli.com/","🌿"),
+("Weavesilk","Art","Create glowing symmetrical art","https://weavesilk.com/","✨"),
+("Kleki","Art","Draw and paint online","https://kleki.com/","🎨"),
+("Sketchpad","Art","Browser drawing studio","https://sketch.io/sketchpad/","🖌️"),
+("Pixilart","Art","Create pixel art","https://www.pixilart.com/draw","🟪"),
+("Patatap","Music","Keyboard sound and animation toy","https://patatap.com/","🎹"),
+("Incredibox","Music","Build beatbox mixes","https://www.incredibox.com/","🎶"),
+("Song Maker","Music","Compose melodies","https://musiclab.chromeexperiments.com/Song-Maker/","🎵"),
+("NASA Space Place","Education","Play science and space games","https://spaceplace.nasa.gov/menu/play/","🚀"),
+("PhET Simulations","Education","Interactive science experiments","https://phet.colorado.edu/en/simulations","🧪"),
+("The Useless Web","Surprise","Discover random playful websites","https://theuselessweb.com/","🎲"),
+("Pointer Pointer","Surprise","Find the image pointing at your cursor","https://pointerpointer.com/","👉"),
+("Zoomquilt","Art","Explore an endless zooming image","https://zoomquilt.org/","🌀"),
+("Akinator","Guessing","Guess a character through questions","https://en.akinator.com/","🧞"),
+("The Impossible Quiz","Quiz","Solve trick questions","https://www.coolmathgames.com/0-the-impossible-quiz","❓"),
+("Word Search","Word","Find words in a letter grid","https://thewordsearch.com/","🔎"),
+("Crossword Labs","Word","Create and solve crosswords","https://crosswordlabs.com/","✍️"),
+("Kakuro","Puzzle","Cross-sum logic puzzle","https://www.kakuro-online.com/","➕"),
+("KenKen","Puzzle","Arithmetic grid puzzle","https://www.kenkenpuzzle.com/","➗"),
+("Lights Out","Puzzle","Toggle lights to solve the grid","https://www.logicgamesonline.com/lightsout/","💡"),
+("Tower of Hanoi","Puzzle","Move discs between pegs","https://www.mathsisfun.com/games/towerofhanoi.html","🗼"),
+("Mastermind","Puzzle","Deduce a hidden code","https://www.webgamesonline.com/mastermind/","🧠"),
+("Jigsaw Explorer","Puzzle","Online jigsaw puzzles","https://www.jigsawexplorer.com/","🧩"),
+("Jigsaw Planet","Puzzle","Community jigsaw puzzles","https://www.jigsawplanet.com/","🧩"),
+("Board Game Arena","Board","Play board games online","https://boardgamearena.com/","🎲"),
+("Tabletopia","Board","Digital tabletop games","https://tabletopia.com/","🎲"),
+("PlayingCards.io","Card","Virtual card games","https://playingcards.io/","🃏"),
+("Game Jolt","Indie Games","Browse indie game projects","https://gamejolt.com/","🎮"),
+("Newgrounds Games","Indie Games","Browse indie games","https://www.newgrounds.com/games","🎮"),
+("itch.io HTML5","Indie Games","Browser game collection","https://itch.io/games/html5","🕹️"),
+("GitHub Browser Games","Open Source","Browse browser game source projects","https://github.com/topics/browser-game","💻"),
+("Open Awesome Browser Games","Open Source","Browse open-source projects","https://open-awesome.com/tags/browser-game","📂"),
+("ArcadeBloom","Indie Games","Curated indie browser games","https://arcadebloom.com/","🌸"),
+("Minix Games","Game Portal","Browser games and puzzles","https://minix.games/browser-games","🎮"),
+("Poki","Game Portal","Browser games catalog","https://poki.com/","🎮"),
+("CrazyGames","Game Portal","Browser games catalog","https://www.crazygames.com/","🎮"),
+("Coolmath Games","Game Portal","Puzzle and casual games","https://www.coolmathgames.com/","🎮"),
+("Y8","Game Portal","Online games catalog","https://www.y8.com/","🎮"),
+("Kizi","Game Portal","Casual games catalog","https://kizi.com/","🎮"),
+("Miniclip","Game Portal","Casual and multiplayer games","https://www.miniclip.com/","🎮"),
+("Armor Games","Game Portal","Strategy and adventure games","https://armorgames.com/","🛡️"),
+("Addicting Games","Game Portal","Casual games catalog","https://www.addictinggames.com/","🎮"),
+("GamePix","Game Portal","HTML5 games catalog","https://www.gamepix.com/","🎮"),
+("Gameflare","Game Portal","Free online games","https://www.gameflare.com/","🎮"),
+("Pogo","Game Portal","Casual games catalog","https://www.pogo.com/","🎮"),
+("Playhop","Game Portal","Browser games catalog","https://playhop.com/","🎮"),
+("Neal.fun","Interactive","Playful web experiments","https://neal.fun/","✨"),
+("Google Arts & Culture","Interactive","Interactive art and culture","https://artsandculture.google.com/experiment","🎨"),
+("NASA Eyes","Exploration","Explore space interactively","https://eyes.nasa.gov/","🪐"),
+("Sporcle Geography","Trivia","Geography quizzes","https://www.sporcle.com/games/category/geography","🗺️"),
+("JetPunk Countries","Trivia","Name countries from memory","https://www.jetpunk.com/quizzes/how-many-countries-can-you-name","🌎"),
+("Flagle","Geography","Guess flags","https://www.flagle.io/","🏳️"),
+("Travle","Geography","Connect countries by borders","https://travle.earth/","🧭"),
+("Globle","Geography","Find the mystery country","https://globle-game.com/","🌐"),
+("GeoGuessr","Geography","Guess places around the world","https://www.geoguessr.com/","🌍"),
+("Seterra","Geography","Map quizzes","https://www.geoguessr.com/seterra","🗺️"),
+("Skribbl.io","Party","Draw and guess","https://skribbl.io/","🎨"),
+("Gartic Phone","Party","Drawing telephone game","https://garticphone.com/","☎️"),
+("Make It Meme","Party","Create memes with friends","https://makeitmeme.com/","😂"),
+("JKLM Fun","Party","Party games","https://jklm.fun/","🎉"),
+("Poptropica","Adventure","Explore islands","https://www.poptropica.com/","🏝️"),
+("Neopets","Virtual World","Virtual pets and mini-games","https://www.neopets.com/","🐾"),
+("Fallen London","RPG","Story-rich RPG","https://www.fallenlondon.com/","🕯️"),
+("Kingdom of Loathing","RPG","Comedic text RPG","https://www.kingdomofloathing.com/","👑"),
+("A Dark Room","Adventure","Text adventure","https://adarkroom.doublespeakgames.com/","🌒"),
+("Untrusted","Puzzle","Code-based puzzle adventure","https://alexnisnevich.github.io/untrusted/","💻"),
+("BrowserQuest","Adventure","Browser RPG project","https://browserquest.mozilla.org/","🧭"),
+("Little Alchemy 2","Crafting","Discover combinations","https://littlealchemy2.com/","🧪"),
+("Cookie Clicker","Clicker","Incremental cookie game","https://orteil.dashnet.org/cookieclicker/","🍪"),
+("Universal Paperclips","Clicker","Incremental paperclip game","https://www.decisionproblem.com/paperclips/","📎"),
+("Particle Clicker","Clicker","Science incremental game","https://particle-clicker.web.cern.ch/","⚛️"),
+("Idle Breakout","Clicker","Brick-breaker idle game","https://www.coolmathgames.com/0-idle-breakout","🧱"),
+("Infinite Craft","Crafting","Discover combinations","https://neal.fun/infinite-craft/","🌱"),
+("Password Game","Puzzle","Rule-based puzzle","https://neal.fun/password-game/","🔐"),
+("Stimulation Clicker","Clicker","Satirical clicker","https://neal.fun/stimulation-clicker/","🖱️"),
+("Dino Game","Arcade","Endless runner","https://chromedino.com/","🦖"),
+("Pong","Arcade","Classic paddle game","https://www.ponggame.org/","🏓"),
+("Asteroids","Arcade","Classic space arcade","https://www.freeasteroids.org/","☄️"),
+("Slope","Arcade","3D rolling-ball challenge","https://www.coolmathgames.com/0-slope","🟢"),
+("Run 3","Platformer","Space tunnel platformer","https://www.coolmathgames.com/0-run-3","🏃"),
+("Fireboy and Watergirl","Platformer","Co-op puzzle platformer","https://www.coolmathgames.com/0-fireboy-and-water-girl-in-the-forest-temple","🔥"),
+("Cut the Rope","Puzzle","Physics puzzle","https://www.crazygames.com/game/cut-the-rope","🍬"),
+("Drift Hunters","Racing","Car drifting","https://www.drifthunters.com/","🚗"),
+("Polytrack","Racing","Time-trial racing","https://polytrack.org/","🏁"),
+("Moto X3M","Racing","Motorbike obstacle game","https://www.coolmathgames.com/0-moto-x3m","🏍️"),
+("Madalin Stunt Cars 2","Racing","Driving and stunts","https://www.madalingames.com/madalin-stunt-cars-2/","🚘"),
+("TETR.IO","Puzzle","Multiplayer block puzzle","https://tetr.io/","🟪"),
+("Jstris","Puzzle","Block stacking game","https://jstris.jezeve.com/","🟦"),
+("Agar.io","Multiplayer","Cell-growing arena","https://agar.io/","🟣"),
+("Slither.io","Multiplayer","Snake arena game","https://slither.io/","🐍"),
+("Piano Tiles","Rhythm","Tap to the beat","https://poki.com/en/g/piano-tiles-2","🎹"),
+("Doodle Jump","Arcade","Endless platform jumping","https://poki.com/en/g/doodle-jump","🦘"),
+("Crossy Road","Arcade","Cross roads and rivers","https://poki.com/en/g/crossy-road","🐔"),
+("Subway Surfers","Arcade","Endless runner","https://poki.com/en/g/subway-surfers","🚇"),
+("Temple Run 2","Arcade","Obstacle runner","https://poki.com/en/g/temple-run-2","🏃"),
+("Basketball Stars","Sports","Arcade basketball","https://www.crazygames.com/game/basketball-stars","🏀"),
+("Football Legends","Sports","Arcade football","https://www.crazygames.com/game/football-legends-2021","⚽"),
+("Soccer Skills World Cup","Sports","Football skill game","https://www.crazygames.com/game/soccer-skills-world-cup","⚽"),
+("8 Ball Pool","Sports","Online pool","https://www.miniclip.com/games/8-ball-pool-multiplayer/en/","🎱"),
+("Table Tennis World Tour","Sports","Arcade table tennis","https://www.crazygames.com/game/table-tennis-world-tour","🏓"),
+("Golf Battle","Sports","Mini golf","https://www.miniclip.com/games/golf-battle/en/","⛳"),
+("Tic-Tac-Toe","Board","Three in a row","https://playtictactoe.org/","⭕"),
+("Checkers","Board","Classic checkers","https://cardgames.io/checkers/","🔴"),
+("Backgammon","Board","Classic backgammon","https://cardgames.io/backgammon/","🎲"),
+("Mahjong Solitaire","Puzzle","Tile matching","https://www.247mahjong.com/","🀄"),
+("Solitaire","Card","Klondike card game","https://solitaired.com/","🃏"),
+("FreeCell","Card","Card strategy","https://cardgames.io/freecell/","♣️"),
+("Spider Solitaire","Card","Card sequencing puzzle","https://cardgames.io/spidersolitaire/","🕷️"),
+("Hearts","Card","Trick-taking card game","https://cardgames.io/hearts/","♥️"),
+("Yahtzee","Dice","Dice scoring game","https://cardgames.io/yahtzee/","🎲"),
+("World Geography Games","Geography","Map quizzes","https://world-geography-games.com/","🌎"),
+("JetPunk","Trivia","Trivia quizzes","https://www.jetpunk.com/","🧠"),
+("Sporcle","Trivia","Trivia games","https://www.sporcle.com/","❓"),
+("Monkeytype","Skill","Typing test","https://monkeytype.com/","⌨️"),
+("Human Benchmark","Skill","Memory and reaction test","https://humanbenchmark.com/","🧠"),
+("TypingClub","Skill","Typing lessons","https://www.typingclub.com/","⌨️"),
+("Keybr","Skill","Typing practice","https://www.keybr.com/","⌨️"),
+("Radio Garden","Exploration","Global radio map","https://radio.garden/","📻"),
+("WindowSwap","Exploration","Real-world window views","https://www.window-swap.com/","🪟"),
+("MapCrunch","Exploration","Random street-view explorer","https://www.mapcrunch.com/","🗺️"),
+("Earth Nullschool","Exploration","Global weather visualization","https://earth.nullschool.net/","🌍"),
+("NASA Eyes","Exploration","Space exploration","https://eyes.nasa.gov/","🪐"),
+("A Soft Murmur","Relax","Ambient sound mixer","https://asoftmurmur.com/","🌧️"),
+("Noisli","Relax","Ambient soundscape","https://www.noisli.com/","🌿"),
+("Weavesilk","Art","Generative art","https://weavesilk.com/","✨"),
+("Kleki","Art","Browser drawing","https://kleki.com/","🎨"),
+("Sketchpad","Art","Drawing studio","https://sketch.io/sketchpad/","🖌️"),
+("Pixilart","Art","Pixel drawing","https://www.pixilart.com/draw","🟪"),
+("Patatap","Music","Sound and animation","https://patatap.com/","🎹"),
+("Incredibox","Music","Beatbox music mixer","https://www.incredibox.com/","🎶"),
+("Song Maker","Music","Music grid composer","https://musiclab.chromeexperiments.com/Song-Maker/","🎵"),
+("NASA Space Place","Education","Space games","https://spaceplace.nasa.gov/menu/play/","🚀"),
+("PhET","Education","Science simulations","https://phet.colorado.edu/en/simulations","🧪"),
+("The Useless Web","Surprise","Random playful website","https://theuselessweb.com/","🎲"),
+("Pointer Pointer","Surprise","Cursor photo experiment","https://pointerpointer.com/","👉"),
+("Zoomquilt","Art","Infinite zoom art","https://zoomquilt.org/","🌀"),
+("Akinator","Guessing","Character guessing game","https://en.akinator.com/","🧞"),
+("The Impossible Quiz","Quiz","Trick-question quiz","https://www.coolmathgames.com/0-the-impossible-quiz","❓"),
+("Word Search","Word","Word finding puzzle","https://thewordsearch.com/","🔎"),
+("Crossword Labs","Word","Crossword puzzles","https://crosswordlabs.com/","✍️"),
+("Kakuro","Puzzle","Cross-sum puzzle","https://www.kakuro-online.com/","➕"),
+("KenKen","Puzzle","Arithmetic grid puzzle","https://www.kenkenpuzzle.com/","➗"),
+("Lights Out","Puzzle","Toggle-light logic puzzle","https://www.logicgamesonline.com/lightsout/","💡"),
+("Tower of Hanoi","Puzzle","Disc-moving puzzle","https://www.mathsisfun.com/games/towerofhanoi.html","🗼"),
+("Mastermind","Puzzle","Code-breaking logic game","https://www.webgamesonline.com/mastermind/","🧠"),
+("Jigsaw Explorer","Puzzle","Online jigsaw puzzles","https://www.jigsawexplorer.com/","🧩"),
+("Jigsaw Planet","Puzzle","Community jigsaws","https://www.jigsawplanet.com/","🧩"),
+("Board Game Arena","Board","Online board games","https://boardgamearena.com/","🎲"),
+("Tabletopia","Board","Digital tabletop games","https://tabletopia.com/","🎲"),
+("PlayingCards.io","Card","Virtual card games","https://playingcards.io/","🃏"),
+("Game Jolt","Indie Games","Indie game projects","https://gamejolt.com/","🎮"),
+("Newgrounds Games","Indie Games","Indie browser games","https://www.newgrounds.com/games","🎮"),
+("itch.io HTML5","Indie Games","HTML5 indie games","https://itch.io/games/html5","🕹️"),
+("GitHub Browser Games","Open Source","Open-source browser games","https://github.com/topics/browser-game","💻"),
+("Open Awesome","Open Source","Open-source game projects","https://open-awesome.com/tags/browser-game","📂"),
+("ArcadeBloom","Indie Games","Curated browser games","https://arcadebloom.com/","🌸"),
+("Minix Games","Game Portal","Browser game directory","https://minix.games/browser-games","🎮"),
+("Poki","Game Portal","Browser games","https://poki.com/","🎮"),
+("CrazyGames","Game Portal","Browser games","https://www.crazygames.com/","🎮"),
+("Coolmath Games","Game Portal","Puzzle and casual games","https://www.coolmathgames.com/","🎮"),
+("Y8","Game Portal","Online games","https://www.y8.com/","🎮"),
+("Kizi","Game Portal","Casual games","https://kizi.com/","🎮"),
+("Miniclip","Game Portal","Casual and multiplayer games","https://www.miniclip.com/","🎮"),
+("Armor Games","Game Portal","Strategy and adventure games","https://armorgames.com/","🛡️"),
+("Addicting Games","Game Portal","Casual games","https://www.addictinggames.com/","🎮"),
+("GamePix","Game Portal","HTML5 games","https://www.gamepix.com/","🎮"),
+("Gameflare","Game Portal","Online games","https://www.gameflare.com/","🎮"),
+("Pogo","Game Portal","Casual games","https://www.pogo.com/","🎮"),
+("Playhop","Game Portal","Browser games","https://playhop.com/","🎮"),
+]
+# Deduplicate by title+url; keep first occurrence
+seen=set()
+unique=[]
+for g in games:
+    key=(g[0].lower(),g[3])
+    if key not in seen:
+        unique.append(g); seen.add(key)
+games=unique
+# HTML escaping data
+data=json.dumps([{"name":n,"category":c,"description":d,"url":u,"icon":i} for n,c,d,u,i in games], ensure_ascii=False)
+html_doc = r'''<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b14">
 <title>GameVault — Play Beyond Limits</title>
 <style>
-:root{--bg:#080b14;--panel:#111827;--line:#253047;--cyan:#52f7ff;--purple:#a78bfa;--muted:#9ba9c3}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#17213b 0%,var(--bg) 55%);color:#f4f7ff;font:16px system-ui,Arial,sans-serif;min-height:100vh}
-header{padding:30px 6%;border-bottom:1px solid var(--line);background:#080b14cc}
-.logo{font-size:28px;font-weight:900;letter-spacing:2px}.logo span{color:var(--cyan)}
-header p{color:var(--muted);margin:5px 0 0}
-main{max-width:1200px;margin:auto;padding:28px 20px}
-.hero{padding:25px 0 30px}.hero h1{font-size:clamp(32px,6vw,58px);line-height:1.05;margin:0 0 12px}.hero h1 span{color:var(--cyan)}
-.hero p{color:var(--muted);max-width:600px}
-.stats{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.stat{background:var(--panel);border:1px solid var(--line);padding:12px 17px;border-radius:12px}
-.stat strong{color:var(--cyan);font-size:20px}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
-input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:11px 14px}
-input,select{background:#0e1524;color:white}input{flex:1;min-width:180px}
-button{background:#17243a;color:white;cursor:pointer;transition:.15s}
-button:hover{border-color:var(--cyan);transform:translateY(-1px)}
-button.primary{background:var(--cyan);color:#061018;font-weight:800;border-color:var(--cyan)}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.filters button.active{background:var(--purple);color:#0b0c16}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:16px}
-.game{background:linear-gradient(145deg,#151e31,#0e1422);border:1px solid var(--line);border-radius:16px;padding:19px;min-height:200px;display:flex;flex-direction:column;gap:10px}
-.game .emoji{font-size:35px}.game h3{margin:0;font-size:20px}.game p{color:var(--muted);margin:0;flex:1;line-height:1.5}
-.tags{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
-.actions{display:flex;gap:8px}.actions button:first-child{flex:1}
-.star{font-size:20px}
-#playArea{margin-top:28px}.playbox{background:#0e1524;border:1px solid var(--line);border-radius:18px;padding:20px;min-height:230px}
-.playtop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-#gameBody{padding:20px 0;text-align:center}
-.big{font-size:42px;font-weight:900;margin:15px}
-.gamebtn{font-size:18px;padding:14px 22px;margin:5px}
-canvas{display:block;width:min(100%,520px);height:auto;background:#050912;border:1px solid var(--line);border-radius:12px;margin:15px auto;touch-action:manipulation}
-.pad{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.muted{color:var(--muted)}footer{text-align:center;color:var(--muted);padding:35px 15px}
-[hidden]{display:none!important}
-@media(max-width:500px){main{padding:20px 13px}.hero{padding-top:12px}.game{min-height:185px}}
-</style>
-</head>
-<body>
-<header>
-  <div class="logo">GAME<span>VAULT</span> ⚡</div>
-  <p>Your arcade. Your rules. Play instantly.</p>
-</header>
+:root{color-scheme:dark;--bg:#080b14;--panel:#111827;--line:#29364f;--cyan:#52f7ff;--purple:#b19aff;--muted:#9ba9c3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#182442 0,var(--bg) 58%);color:#f4f7ff;font:16px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+header{padding:24px clamp(16px,5vw,70px);border-bottom:1px solid var(--line);background:#080b14d9;position:sticky;top:0;z-index:3;backdrop-filter:blur(12px)}
+.brand{font-size:27px;font-weight:950;letter-spacing:2px}.brand span,.hero h1 span{color:var(--cyan)}header p{margin:2px 0 0;color:var(--muted)}
+main{max-width:1380px;margin:auto;padding:24px clamp(12px,3vw,32px) 48px}.hero{padding:24px 0}.hero h1{font-size:clamp(34px,6vw,64px);line-height:1.02;margin:0 0 12px}.hero p{max-width:720px;color:var(--muted);margin:0}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.stat{background:#111827c9;border:1px solid var(--line);border-radius:13px;padding:11px 16px;min-width:120px}.stat strong{color:var(--cyan);font-size:22px;display:block}
+.controls{display:grid;grid-template-columns:minmax(180px,1fr) minmax(140px,220px) auto;gap:10px;margin:18px 0}input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:11px 13px}input,select{background:#0e1524;color:#fff;min-width:0}button{background:#17243a;color:#fff;cursor:pointer}button:hover{border-color:var(--cyan)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.primary{background:var(--cyan);color:#061018;font-weight:800;border-color:var(--cyan)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 20px}.filters button.active{background:var(--purple);color:#0b0c16;border-color:var(--purple)}
+.note{color:var(--muted);font-size:13px;margin:8px 0 18px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,245px),1fr));gap:14px}.game{background:linear-gradient(145deg,#151f33,#0e1422);border:1px solid var(--line);border-radius:16px;padding:17px;min-height:205px;display:flex;flex-direction:column;gap:9px;transition:transform .15s,border-color .15s}.game:hover{transform:translateY(-2px);border-color:#4b6b88}.emoji{font-size:32px}.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px}.game h2{font-size:18px;line-height:1.2;margin:0}.game p{margin:0;color:var(--muted);font-size:14px;flex:1}.actions{display:flex;gap:8px;margin-top:6px}.actions a{display:block;text-align:center;text-decoration:none;flex:1;background:var(--cyan);color:#07121b;font-weight:800;padding:10px;border-radius:9px}.actions button{padding:8px 11px}.empty{grid-column:1/-1;padding:32px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}
+footer{padding:28px 15px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:13px}.pill{font-size:11px;padding:3px 7px;border-radius:999px;background:#202b41;color:#bfcce4}
+@media(max-width:640px){header{position:static}.controls{grid-template-columns:1fr}.hero{padding-top:10px}.stat{flex:1}.game{min-height:185px}}
+</style></head><body>
+<header><div class="brand">GAME<span>VAULT</span> ⚡</div><p>Your arcade. Real games. One place.</p></header>
 <main>
-<section class="hero">
-  <h1>ENTER THE <span>ARCADE.</span></h1>
-  <p>Eight mini-games. Zero downloads. Pick your challenge and chase a new high score.</p>
-  <div class="stats">
-    <div class="stat"><strong>8</strong><br>Playable games</div>
-    <div class="stat"><strong id="played">0</strong><br>Games launched</div>
-    <div class="stat"><strong id="bestTotal">0</strong><br>Personal bests</div>
-  </div>
-  <button class="primary" onclick="surprise()">🎲 Surprise me</button>
+<section class="hero"><h1>ENTER THE <span>ARCADE.</span></h1><p>A growing directory of real browser games, puzzles, racers, clickers, adventures and more. Each card opens the game or its official game page—some sites may require an account or block embedding, so GameVault opens them in a new tab.</p>
+<div class="stats"><div class="stat"><strong id="count">0</strong>Catalog entries</div><div class="stat"><strong id="shown">0</strong>Showing</div><div class="stat"><strong id="favCount">0</strong>Favorites</div></div>
 </section>
-<div class="controls">
-  <input id="search" placeholder="🔎 Search games..." oninput="render()">
-  <select id="sort" onchange="render()">
-    <option value="default">Sort: Featured</option>
-    <option value="az">Name: A–Z</option>
-    <option value="best">Highest personal best</option>
-  </select>
-</div>
-<div class="filters" id="filters">
-  <button class="active" data-cat="All">All games</button>
-  <button data-cat="Arcade">Arcade</button>
-  <button data-cat="Action">Action</button>
-  <button data-cat="Puzzle">Puzzle</button>
-  <button data-cat="Racing">Racing</button>
-  <button data-cat="Casual">Casual</button>
-  <button data-cat="Favorites">⭐ Favorites</button>
-</div>
-<section class="grid" id="grid"></section>
-
-<section id="playArea" hidden>
-  <div class="playbox">
-    <div class="playtop">
-      <div><div class="muted" id="category"></div><h2 id="gameTitle">Game</h2></div>
-      <button onclick="closeGame()">✕ Close game</button>
-    </div>
-    <div id="gameBody"></div>
-  </div>
-</section>
-</main>
-<footer>GAMEVAULT © 2026 · Built for players, by players ⚡</footer>
+<div class="controls"><input id="search" type="search" placeholder="🔎 Search games, genres, or tags…" autocomplete="off"><select id="sort"><option value="featured">Sort: Featured</option><option value="az">Name: A–Z</option><option value="category">Genre</option></select><button id="random" class="primary">🎲 Surprise me</button></div>
+<div class="filters" id="filters"><button class="active" data-cat="All">All</button></div>
+<p class="note">External games open in a new tab. These are catalog links, not all embedded games; availability, age ratings, accounts, and mobile support depend on each game's owner.</p>
+<section class="grid" id="grid" aria-live="polite"></section>
+</main><footer>GAMEVAULT © 2026 · A player-first browser-game directory ⚡</footer>
 <script>
-const games=[
-{id:'reflex',name:'Neon Reflex',emoji:'⚡',cat:'Arcade',desc:'Test your reaction speed. Wait for green, then click as fast as you can.',tag:'Reaction'},
-{id:'snake',name:'Neon Snake',emoji:'🐍',cat:'Arcade',desc:'Eat glowing dots, grow longer, and avoid crashing into yourself.',tag:'Classic'},
-{id:'breakout',name:'Brick Breaker',emoji:'🧱',cat:'Arcade',desc:'Bounce the ball, smash the bricks, and clear the board.',tag:'Skill'},
-{id:'memory',name:'Memory Matrix',emoji:'🧠',cat:'Puzzle',desc:'Flip cards and match every pair. Can you remember them all?',tag:'Brain'},
-{id:'clicker',name:'Cozy Clicker',emoji:'🪙',cat:'Casual',desc:'Tap to earn coins and buy upgrades that boost every click.',tag:'Idle'},
-{id:'ninja',name:'Number Ninja',emoji:'🥷',cat:'Puzzle',desc:'Solve quick math challenges before your 30 seconds run out.',tag:'Speed'},
-{id:'racer',name:'Cyber Racer',emoji:'🏎️',cat:'Racing',desc:'Dodge traffic for as long as you can. One collision ends the run.',tag:'Endless'},
-{id:'space',name:'Space Defender',emoji:'🚀',cat:'Action',desc:'Defend your ship from falling enemies. Move and fire to survive.',tag:'Shooter'}
-];
-let category='All',current=null,timers=[],state={},played=Number(localStorage.gvPlayed||0);
+const games = __GAME_DATA__;
 const $=id=>document.getElementById(id);
-function best(id){return Number(localStorage['gvBest_'+id]||0)}
-function saveBest(id,n){if(n>best(id))localStorage['gvBest_'+id]=Math.floor(n);updateStats()}
-function updateStats(){$('played').textContent=played;$('bestTotal').textContent=games.filter(g=>best(g.id)>0).length}
-function favorites(){try{return JSON.parse(localStorage.gvFav||'[]')}catch{return []}}
-function toggleFav(id){let f=favorites();f=f.includes(id)?f.filter(x=>x!==id):[...f,id];localStorage.gvFav=JSON.stringify(f);render()}
-$('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-cat]');if(!b)return;category=b.dataset.cat;document.querySelectorAll('.filters button').forEach(x=>x.classList.toggle('active',x===b));render()});
+let category='All', mode='all';
+const categories=[...new Set(games.map(g=>g.category))].sort();
+const key='gv-real-favs-v1';
+function getFavs(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}}
+function saveFavs(a){try{localStorage.setItem(key,JSON.stringify(a))}catch{}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setupFilters(){
+  const wrap=$('filters');
+  categories.forEach(cat=>{const b=document.createElement('button');b.dataset.cat=cat;b.textContent=cat;wrap.append(b)});
+  const fav=document.createElement('button');fav.dataset.cat='⭐ Favorites';fav.textContent='⭐ Favorites';wrap.append(fav);
+  wrap.addEventListener('click',e=>{const b=e.target.closest('button[data-cat]');if(!b)return;category=b.dataset.cat;wrap.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));render()});
+}
 function render(){
-let list=games.filter(g=>(category==='All'||(category==='Favorites'?favorites().includes(g.id):g.cat===category))&&(g.name+' '+g.desc+' '+g.cat).toLowerCase().includes($('search').value.toLowerCase()));
-if($('sort').value==='az')list.sort((a,b)=>a.name.localeCompare(b.name));
-if($('sort').value==='best')list.sort((a,b)=>best(b.id)-best(a.id));
-$('grid').innerHTML=list.map(g=>`<article class="game"><div class="emoji">${g.emoji}</div><div class="tags"><span>${g.cat} · ${g.tag}</span><span>🏆 ${best(g.id)}</span></div><h3>${g.name}</h3><p>${g.desc}</p><div class="actions"><button class="primary" onclick="launch('${g.id}')">▶ Play now</button><button class="star" title="Favorite" onclick="toggleFav('${g.id}')">${favorites().includes(g.id)?'⭐':'☆'}</button></div></article>`).join('');
-if(!list.length)$('grid').innerHTML='<p class="muted">No games found. Try another search!</p>';
-updateStats()
+ const q=$('search').value.trim().toLowerCase(),favs=getFavs();
+ let list=games.filter(g=>(category==='All'||(category==='⭐ Favorites'?favs.includes(g.name):g.category===category))&&(`${g.name} ${g.category} ${g.description}`).toLowerCase().includes(q));
+ const sort=$('sort').value;
+ if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));
+ if(sort==='category')list.sort((a,b)=>a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+ $('grid').innerHTML=list.map(g=>`<article class="game"><div class="emoji">${esc(g.icon)}</div><div class="meta"><span>${esc(g.category)}</span><span class="pill">EXTERNAL LINK</span></div><h2>${esc(g.name)}</h2><p>${esc(g.description)}</p><div class="actions"><a href="${esc(g.url)}" target="_blank" rel="noopener noreferrer">▶ Open game ↗</a><button type="button" aria-label="${favs.includes(g.name)?'Remove from':'Add to'} favorites: ${esc(g.name)}" title="Toggle favorite" data-fav="${esc(g.name)}">${favs.includes(g.name)?'⭐':'☆'}</button></div></article>`).join('')||'<div class="empty">No matching games. Try another search or category.</div>';
+ $('count').textContent=games.length;$('shown').textContent=list.length;$('favCount').textContent=favs.length;
 }
-function clearTimers(){timers.forEach(clearInterval);timers.forEach(clearTimeout);timers=[]}
-function later(fn,ms){let t=setTimeout(fn,ms);timers.push(t);return t}
-function every(fn,ms){let t=setInterval(fn,ms);timers.push(t);return t}
-function closeGame(){clearTimers();current=null;$('playArea').hidden=true;render()}
-function launch(id){
-clearTimers();current=id;state={};played++;localStorage.gvPlayed=played;
-$('playArea').hidden=false;$('category').textContent=games.find(g=>g.id===id).cat.toUpperCase();$('gameTitle').textContent=games.find(g=>g.id===id).name;
-$('gameBody').innerHTML='';$('playArea').scrollIntoView({behavior:'smooth',block:'start'});updateStats();
-({reflex,snake,breakout,memory,clicker,ninja,racer,space})[id]()
-}
-function surprise(){launch(games[Math.floor(Math.random()*games.length)].id)}
-function button(label,fn,cls='gamebtn'){let b=document.createElement('button');b.className=cls;b.textContent=label;b.onclick=fn;return b}
-function text(s){let p=document.createElement('p');p.textContent=s;p.className='muted';$('gameBody').append(p);return p}
-function big(s){let d=document.createElement('div');d.className='big';d.textContent=s;$('gameBody').append(d);return d}
-function canvas(w,h){let c=document.createElement('canvas');c.width=w;c.height=h;$('gameBody').append(c);return [c,c.getContext('2d')]}
-function reflex(){
-text('Click start. When the panel turns green, click as quickly as possible. Five rounds!');
-let b=button('Start round');$('gameBody').append(b);let info=big('Ready?');let round=0,total=0,go=false,start=0;
-b.onclick=()=>{if(go){if(!state.active)return;let ms=Date.now()-start;total+=ms;round++;go=false;state.active=false;info.textContent=ms+' ms';b.textContent=round<5?'Next round':'Play again';if(round===5){let avg=Math.round(total/5);info.textContent='Average: '+avg+' ms';saveBest('reflex',Math.max(0,1000-avg));text('Lower reaction time is better!');b.textContent='Restart';round=0;total=0}return}
-state.active=true;go=false;b.disabled=true;info.textContent='Wait for green…';info.style.color='#ff6688';
-later(()=>{if(!state.active)return;go=true;start=Date.now();info.textContent='CLICK NOW!';info.style.color='#52f7ff';b.disabled=false;b.textContent='CLICK!'},700+Math.random()*2200);
-b.disabled=true;let wait=timers[timers.length-1];}
-b.onclick=()=>{if(state.active&&go){let ms=Date.now()-start;total+=ms;round++;state.active=false;go=false;info.style.color='white';if(round>=5){let avg=Math.round(total/5);info.textContent='Average '+avg+' ms';saveBest('reflex',Math.max(0,1000-avg));text('Score is based on reaction speed. Lower time is better.');round=0;total=0}else{info.textContent=ms+' ms · Round '+round+'/5'}b.textContent='Next round';b.disabled=false}else if(state.active&&!go){state.active=false;clearTimers();info.textContent='Too early! Try again.';b.textContent='Try again';b.disabled=false}else{state.active=true;b.disabled=true;info.textContent='Wait for green…';info.style.color='#ff6688';later(()=>{if(!state.active)return;go=true;start=Date.now();info.textContent='CLICK NOW!';info.style.color='#52f7ff';b.disabled=false;b.textContent='CLICK!'},700+Math.random()*2200)}}
-}
-function snake(){
-text('Use arrow keys or WASD. On mobile, use the direction buttons.');
-let [c,x]=canvas(360,360);let size=18,body=[{x:9,y:9},{x:8,y:9},{x:7,y:9}],dir={x:1,y:0},food={x:14,y:9},score=0,dead=false;
-let scoreEl=big('Score: 0');
-function place(){food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}
-function draw(){x.fillStyle='#050912';x.fillRect(0,0,360,360);x.fillStyle='#ffda6b';x.fillRect(food.x*size,food.y*size,size-2,size-2);x.fillStyle='#52f7ff';body.forEach(p=>x.fillRect(p.x*size,p.y*size,size-2,size-2))}
-function step(){if(dead)return;let h={x:body[0].x+dir.x,y:body[0].y+dir.y};if(h.x<0||h.y<0||h.x>=20||h.y>=20||body.some(p=>p.x===h.x&&p.y===h.y)){dead=true;saveBest('snake',score);text('Game over! Final score: '+score);return}body.unshift(h);if(h.x===food.x&&h.y===food.y){score++;scoreEl.textContent='Score: '+score;place()}else body.pop();draw()}
-function turn(dx,dy){if(dx!==-dir.x||dy!==-dir.y)dir={x:dx,y:dy}}
-state.key=e=>{let k=e.key.toLowerCase();if(k==='arrowup'||k==='w')turn(0,-1);if(k==='arrowdown'||k==='s')turn(0,1);if(k==='arrowleft'||k==='a')turn(-1,0);if(k==='arrowright'||k==='d')turn(1,0)};
-window.addEventListener('keydown',state.key);timers.push(setInterval(()=>window.removeEventListener('keydown',state.key),86400000));every(step,135);
-let pad=document.createElement('div');pad.className='pad';[['↑',0,-1],['←',-1,0],['↓',0,1],['→',1,0]].forEach(([s,dx,dy])=>pad.append(button(s,()=>turn(dx,dy))));$('gameBody').append(pad);draw()
-}
-function breakout(){
-text('Move with ← → or A/D, or use the buttons. Clear the bricks!');
-let [c,x]=canvas(420,300),p=170,b={x:210,y:240,dx:3,dy:-3},bricks=[],score=0,done=false;
-for(let r=0;r<4;r++)for(let col=0;col<8;col++)bricks.push({x:10+col*50,y:18+r*24,on:true});
-let scoreEl=big('Bricks: 0');
-function draw(){x.fillStyle='#050912';x.fillRect(0,0,420,300);bricks.forEach((q,i)=>{if(q.on){x.fillStyle=['#52f7ff','#a78bfa','#ff7bba','#ffda6b'][Math.floor(i/8)];x.fillRect(q.x,q.y,44,16)}});x.fillStyle='white';x.fillRect(p,278,80,9);x.beginPath();x.arc(b.x,b.y,6,0,Math.PI*2);x.fill()}
-function step(){if(done)return;b.x+=b.dx;b.y+=b.dy;if(b.x<6||b.x>414)b.dx*=-1;if(b.y<6)b.dy*=-1;if(b.y>270&&b.x>p&&b.x<p+80)b.dy=-Math.abs(b.dy);if(b.y>300){done=true;text('Ball lost! Score: '+score);saveBest('breakout',score);return}
-bricks.forEach(q=>{if(q.on&&b.x>q.x&&b.x<q.x+44&&b.y>q.y&&b.y<q.y+16){q.on=false;b.dy*=-1;score++;scoreEl.textContent='Bricks: '+score}});
-if(score===32){done=true;text('Board cleared!');saveBest('breakout',score)}draw()}
-function move(d){p=Math.max(0,Math.min(340,p+d))}
-state.key=e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')move(-22);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')move(22)};window.addEventListener('keydown',state.key);every(step,25);
-let pad=document.createElement('div');pad.className='pad';pad.append(button('⬅ Move',()=>move(-30)),button('Move ➡',()=>move(30)));$('gameBody').append(pad);draw()
-}
-function memory(){
-text('Flip two cards at a time and match all eight pairs.');
-let vals=['🚀','👾','💎','⚡','🪐','🎮','🤖','🌟'],deck=[...vals,...vals].sort(()=>Math.random()-.5),open=[],matched=[],moves=0;
-let info=big('Moves: 0'),grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(48px,75px));gap:8px;justify-content:center';$('gameBody').append(grid);
-function draw(){grid.innerHTML='';deck.forEach((v,i)=>{let b=button(matched.includes(i)||open.includes(i)?v:'?',()=>flip(i));b.style.cssText='height:65px;font-size:25px;padding:4px';b.disabled=matched.includes(i)||open.includes(i);grid.append(b)})}
-function flip(i){if(open.length===2||open.includes(i)||matched.includes(i))return;open.push(i);draw();if(open.length===2){moves++;info.textContent='Moves: '+moves;let pair=[...open];if(deck[pair[0]]===deck[pair[1]]){matched.push(...pair);open=[];draw();if(matched.length===16){text('All matched in '+moves+' moves!');saveBest('memory',Math.max(1,100-moves))}}else later(()=>{open=[];draw()},700)}}
-draw()
-}
-function clicker(){
-let coins=0,level=1,cost=10;let info=big('🪙 Coins: 0');let sub=text('Upgrade cost: 10 coins · Each click earns 1 coin.');
-let tap=button('🪙 TAP TO EARN',()=>{coins+=level;info.textContent='🪙 Coins: '+coins;sub.textContent='Upgrade cost: '+cost+' coins · Each click earns '+level+'.'},'gamebtn primary');
-let up=button('⬆ Buy upgrade',()=>{if(coins>=cost){coins-=cost;level++;cost=Math.ceil(cost*1.7);info.textContent='🪙 Coins: '+coins;sub.textContent='Upgrade cost: '+cost+' coins · Each click earns '+level+'.'}else sub.textContent='Not enough coins yet — keep tapping!'});
-$('gameBody').append(tap,up);let score=0;let end=button('Finish & save score',()=>saveBest('clicker',coins));$('gameBody').append(end)
-}
-function ninja(){
-text('Solve as many as you can in 30 seconds.');let score=0,left=30,answer=0;
-let timer=big('30 seconds'),question=big('Ready?'),input=document.createElement('input');input.type='number';input.placeholder='Your answer';input.style.maxWidth='180px';
-let go=button('Start',start,'gamebtn primary');$('gameBody').append(input,go);
-function next(){let a=Math.floor(Math.random()*15)+1,b=Math.floor(Math.random()*15)+1,op=Math.random()<.5?'+':'−';if(op==='−'&&b>a)[a,b]=[b,a];answer=op==='+'?a+b:a-b;question.textContent=a+' '+op+' '+b+' = ?';input.value=''}
-function start(){score=0;left=30;go.disabled=true;input.disabled=false;next();every(()=>{left--;timer.textContent=left+' seconds';if(left<=0){clearTimers();go.disabled=false;input.disabled=true;go.textContent='Play again';question.textContent='Time! Score: '+score;saveBest('ninja',score)}},1000)}
-function submit(){if(go.disabled&&input.value!==''&&Number(input.value)===answer){score++;next();timer.textContent=left+' seconds · Score '+score}}
-input.addEventListener('input',submit);input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()})
-}
-function racer(){
-text('Move left or right to dodge incoming traffic. Arrow keys or buttons work.');
-let [c,x]=canvas(300,360),lane=1,obs=[],score=0,dead=false,frame=0;let info=big('Distance: 0');
-function draw(){x.fillStyle='#101827';x.fillRect(0,0,300,360);x.strokeStyle='#59657c';x.setLineDash([14,12]);x.beginPath();x.moveTo(100,0);x.lineTo(100,360);x.moveTo(200,0);x.lineTo(200,360);x.stroke();x.setLineDash([]);x.fillStyle='#52f7ff';x.fillRect(20+lane*100,300,60,42);obs.forEach(o=>{x.fillStyle='#ff6487';x.fillRect(20+o.lane*100,o.y,60,42)})}
-function step(){if(dead)return;frame++;if(frame%34===0)obs.push({lane:Math.floor(Math.random()*3),y:-45});obs.forEach(o=>o.y+=4);obs=obs.filter(o=>o.y<380);if(obs.some(o=>o.lane===lane&&o.y>265&&o.y<340)){dead=true;text('Crash! Distance: '+score);saveBest('racer',score);return}score++;info.textContent='Distance: '+score;draw()}
-function move(d){lane=Math.max(0,Math.min(2,lane+d));draw()}
-state.key=e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')move(-1);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')move(1)};window.addEventListener('keydown',state.key);every(step,45);
-let pad=document.createElement('div');pad.className='pad';pad.append(button('⬅ Left',()=>move(-1)),button('Right ➡',()=>move(1)));$('gameBody').append(pad);draw()
-}
-function space(){
-text('Move left/right and shoot. Keyboard: arrows or A/D + Space. On mobile, use the buttons.');
-let [c,x]=canvas(360,360),px=180,shots=[],enemies=[],score=0,frame=0,dead=false;let info=big('Score: 0'),fire=false;
-function shoot(){if(!dead)shots.push({x:px+15,y:300})}
-function draw(){x.fillStyle='#050912';x.fillRect(0,0,360,360);for(let i=0;i<35;i++){x.fillStyle='#7788aa';x.fillRect((i*71)%360,(i*43+frame*2)%360,2,2)}x.fillStyle='#52f7ff';x.fillRect(px,320,30,20);x.fillStyle='#ffda6b';shots.forEach(s=>x.fillRect(s.x,s.y,4,12));x.fillStyle='#ff6688';enemies.forEach(e=>x.fillRect(e.x,e.y,23,20))}
-function step(){if(dead)return;frame++;if(frame%32===0)enemies.push({x:Math.random()*330,y:-20});shots.forEach(s=>s.y-=7);enemies.forEach(e=>e.y+=2);shots=shots.filter(s=>s.y>0);enemies=enemies.filter(e=>e.y<370);enemies.forEach(e=>shots.forEach(s=>{if(!e.dead&&s.x>e.x&&s.x<e.x+23&&s.y<e.y+20&&s.y>e.y){e.dead=true;s.y=-30;score++}}));enemies=enemies.filter(e=>!e.dead);if(enemies.some(e=>e.y>300&&e.x<px+30&&e.x+23>px)){dead=true;text('Ship hit! Final score: '+score);saveBest('space',score);return}info.textContent='Score: '+score;draw()}
-function move(d){px=Math.max(0,Math.min(330,px+d));draw()}
-state.key=e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')move(-15);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')move(15);if(e.code==='Space'){e.preventDefault();shoot()}};window.addEventListener('keydown',state.key);every(step,35);
-let pad=document.createElement('div');pad.className='pad';pad.append(button('⬅',()=>move(-20)),button('🚀 FIRE',shoot,'gamebtn primary'),button('➡',()=>move(20)));$('gameBody').append(pad);draw()
-}
-render();updateStats();
-</script>
-</body>
-</html>
+$('grid').addEventListener('click',e=>{const b=e.target.closest('[data-fav]');if(!b)return;let f=getFavs(),n=b.dataset.fav;f=f.includes(n)?f.filter(x=>x!==n):[...f,n];saveFavs(f);render()});
+$('search').addEventListener('input',render);$('sort').addEventListener('change',render);
+$('random').addEventListener('click',()=>{const q=$('search').value.trim().toLowerCase(),f=getFavs();const list=games.filter(g=>(category==='All'||(category==='⭐ Favorites'?f.includes(g.name):g.category===category))&&(`${g.name} ${g.category} ${g.description}`).toLowerCase().includes(q));if(!list.length)return;const g=list[Math.floor(Math.random()*list.length)];window.open(g.url,'_blank','noopener,noreferrer')});
+setupFilters();render();
+</script></body></html>'''
+html_doc=html_doc.replace("__GAME_DATA__",data)
+path="/mnt/data/gamevault-index.html"
+with open(path,"w",encoding="utf-8") as f: f.write(html_doc)
+len(games), os.path.getsize(path), path
